@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="toolbar_elevation">4dp</dimen>
+
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_medium">12dp</dimen>
+    <dimen name="padding_large">16dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="icon_micro">16dp</dimen>
+    <dimen name="icon_small">24dp</dimen><!--Notification-->
+    <dimen name="icon_medium">32dp</dimen>
+    <dimen name="icon_large">48dp</dimen><!--StartUp-->
+    <dimen name="icon_xlarge">60dp</dimen>
+    <dimen name="icon_jumbo">160dp</dimen>
+
+    <dimen name="textSize_micro">12sp</dimen>
+    <dimen name="textSize_small">14sp</dimen><!--MainBody-->
+    <dimen name="textSize_medium">18sp</dimen><!--small title-->
+    <dimen name="textSize_large">22sp</dimen><!--header-->
+
+</resources>
