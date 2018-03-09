@@ -2,6 +2,8 @@ package com.example.jingze.zcryptocurrency;
 
 import android.content.res.Configuration;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.drawer_nav_left) NavigationView navigationView;
+    @BindView(R.id.main_viewpager) ViewPager viewPager;
+    @BindView((R.id.main_viewpager_tab)) TabLayout viewPager_tab;
 
     private ActionBarDrawerToggle drawerToggle;
 
@@ -30,17 +34,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupActionBar() {
-//        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-//        drawerLayout = findViewById(R.id.main_drawer_layout);
+
         drawerToggle = new ActionBarDrawerToggle(
                 this, drawerLayout, R.string.open_drawer, R.string.close_drawer
         );
         drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
+//        drawerToggle.syncState();
 
 //        navigationView.setNavigationItemSelectedListener(null);
 
@@ -49,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-//        drawerToggle.syncState();
+        drawerToggle.syncState();
     }
 
     @Override
@@ -70,5 +73,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    private void setupViewPager() {
+
     }
 }
