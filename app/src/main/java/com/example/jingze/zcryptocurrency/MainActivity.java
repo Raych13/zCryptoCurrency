@@ -19,9 +19,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.drawer_nav_left) NavigationView navigationView;
 
-    private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
