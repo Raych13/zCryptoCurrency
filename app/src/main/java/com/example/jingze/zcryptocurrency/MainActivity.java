@@ -30,22 +30,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        setupUI();
+    }
+
+    private void setupUI() {
+        setSupportActionBar(toolbar);
         setupActionBar();
+        setupViewpager();
+
     }
 
     private void setupActionBar() {
-        setSupportActionBar(toolbar);
+        //If you add toolbar when you call ActionBarDrawerToggle method, you can skip the two steps below.
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
 
         drawerToggle = new ActionBarDrawerToggle(
-                this, drawerLayout, R.string.open_drawer, R.string.close_drawer
-        );
+                this, drawerLayout, R.string.open_drawer, R.string.close_drawer);
         drawerLayout.addDrawerListener(drawerToggle);
-//        drawerToggle.syncState();
 
+//        drawerToggle.syncState();
 //        navigationView.setNavigationItemSelectedListener(null);
+    }
+
+    private void setupViewpager() {
 
     }
 
