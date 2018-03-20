@@ -12,6 +12,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.jingze.zcryptocurrency.model.Coin;
+import com.example.jingze.zcryptocurrency.utils.ModelUtils;
+import com.example.jingze.zcryptocurrency.view.ViewpagerAdapter;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -38,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setupActionBar();
         setupViewpager();
-
     }
 
     private void setupActionBar() {
@@ -56,8 +63,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupViewpager() {
+        ArrayList<ArrayList<Coin>> mainMenu = mockData();
+        viewPager.setAdapter(new ViewpagerAdapter(getSupportFragmentManager(), mainMenu));
 
+        viewPager_tab.setupWithViewPager(viewPager);
     }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -84,7 +95,10 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    private void setupViewPager() {
 
+    private ArrayList<ArrayList<Coin>> mockData() {
+        String jsonListList = "[[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"priceUSD\":13000.13,\"dailyChange\":0.3333},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"priceUSD\":1333.13,\"dailyChange\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"priceUSD\":393.13,\"dailyChange\":0.3131}],[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"priceUSD\":13000.13,\"dailyChange\":0.3333},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"priceUSD\":1333.13,\"dailyChange\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"priceUSD\":393.13,\"dailyChange\":0.3131},{\"coinType\":\"NEM\",\"currencyType\":\"USD\",\"priceUSD\":0.31,\"dailyChange\":-0.13},{\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"priceUSD\":0.74,\"dailyChange\":0.0}]]";
+        ArrayList<ArrayList<Coin>> total = ModelUtils.toObject(jsonListList, new TypeToken<ArrayList<ArrayList<Coin>>>(){});
+        return total;
     }
 }

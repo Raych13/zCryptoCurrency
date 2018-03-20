@@ -5,6 +5,13 @@
     <color name="colorAccent">#FF4081</color>
     <color name="golden">#EEDD00</color>
     <color name="lemonYellow">#FFEE33</color>
+    <color name="pureWhite">#FFFFFFFF</color>
+    <color name="yellowWhite">#FFFFFFCC</color>
 
     <color name="place_holder_bg">#33000000</color>
+
+    <color name="price_green">#AA00CC33</color>
+    <color name="price_red">#AACC3333</color>
+    <color name="price_grey">#AAA0A0A0</color>
+    <color name="item_text_color">#FFFFFFFF</color>
 </resources>

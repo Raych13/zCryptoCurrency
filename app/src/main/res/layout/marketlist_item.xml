@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:att="http://schemas.android.com/apk/res-auto"
+    android:paddingHorizontal="@dimen/spacing_medium"
+    android:paddingVertical="@dimen/spacing_small"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/marketList_item_title_txv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="@dimen/textSize_large"
+        android:textColor="@color/item_text_color"
+        tools:text="BTC - USD"/>
+
+    <TextView
+        android:id="@+id/marketList_item_price_txv"
+        android:layout_width="@dimen/price_txv_size"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/spacing_small"
+        android:gravity="center_vertical|right"
+        android:textSize="@dimen/textSize_medium"
+        android:maxLines="1"
+        android:textColor="@color/item_text_color"
+        tools:text="$10000.00"/>
+
+    <LinearLayout
+        android:id="@+id/marketList_item_change_bg"
+        android:layout_width="@dimen/change_txv_size"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="@dimen/spacing_micro"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/price_grey">
+
+        <ImageView
+            android:id="@+id/marketList_item_changeSymbol_igv"
+            android:layout_width="@dimen/icon_small"
+            android:layout_height="@dimen/icon_small"
+            android:layout_marginTop="1dp"/>
+
+        <!--<TextView-->
+            <!--android:id="@+id/marketList_item_changeSymbol_txv"-->
+            <!--android:layout_width="15dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="1dp"-->
+            <!--android:gravity="center_vertical"-->
+            <!--android:textSize="@dimen/textSize_large"-->
+            <!--android:text=" "-->
+            <!--tools:text="+"/>-->
+
+        <TextView
+            android:id="@+id/marketList_item_changeRate_txv"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|right"
+            android:textSize="@dimen/textSize_medium"
+            android:maxLines="1"
+            android:textColor="@color/item_text_color"
+            android:text="N/A %"
+            tools:text="N/A %"/>
+
+    </LinearLayout>
+
+</LinearLayout>

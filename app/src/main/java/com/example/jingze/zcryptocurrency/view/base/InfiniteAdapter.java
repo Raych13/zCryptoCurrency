@@ -22,6 +22,10 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
     private final Context context;
     private final LoadMoreListener loadMoreListener;
 
+    public interface LoadMoreListener {
+        void onLoadMore();
+    }
+
     public InfiniteAdapter(@NonNull Context context,
                            @NonNull List<T> data,
                            @NonNull LoadMoreListener loadMoreListener,
@@ -85,23 +89,20 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
         notifyDataSetChanged();
     }
 
-//    public List<T> getData() {
-//        return data;
-//    }
+    public List<T> getData() {
+        return data;
+    }
 
     public void setHasMoreData(boolean hasMoreData) {
         this.hasMoreData = hasMoreData;
     }
 
-//    protected Context getContext() {
-//        return context;
-//    }
+    protected Context getContext() {
+        return context;
+    }
 
     protected abstract BaseViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType);
 
     protected abstract void onBindItemViewHolder(BaseViewHolder holder, int position);
 
-    public interface LoadMoreListener {
-        void onLoadMore();
-    }
 }
