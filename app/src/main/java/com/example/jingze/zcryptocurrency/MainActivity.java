@@ -1,6 +1,8 @@
 package com.example.jingze.zcryptocurrency;
 
 import android.content.res.Configuration;
+import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -9,6 +11,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -23,11 +26,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.main_drawer_layout) DrawerLayout drawerLayout;
     @BindView(R.id.drawer_nav_left) NavigationView navigationView;
+    @BindView(R.id.main_appbar) AppBarLayout appBarLayout;
     @BindView(R.id.main_viewpager) ViewPager viewPager;
     @BindView((R.id.main_viewpager_tab)) TabLayout viewPager_tab;
 
@@ -39,41 +43,49 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        setupUI();
+        Log.i("Taych", "Is: " + (savedInstanceState == null));
+        setupUI(savedInstanceState);
     }
 
-    private void setupUI() {
+    private void setupUI(Bundle savedInstanceState) {
         setSupportActionBar(toolbar);
+        getSupportActionBar().setElevation(1);
         setupActionBar();
-        setupViewpager();
+        setupViewpager(savedInstanceState);
     }
+
 
     private void setupActionBar() {
         //If you add toolbar when you call ActionBarDrawerToggle method, you can skip the two steps below.
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setHomeButtonEnabled(true);
 
+//        Immersive UI
+//        if (Build.VERSION.SDK_INT >= 21) {
+//            View decorView = getWindow().getDecorView();
+//            int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+//            decorView.setSystemUiVisibility(option);
+//            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+//            getWindow().setStatusBarColor(Color.TRANSPARENT);
+//        }
 
         drawerToggle = new ActionBarDrawerToggle(
-                this, drawerLayout, R.string.open_drawer, R.string.close_drawer);
+                this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer);
         drawerLayout.addDrawerListener(drawerToggle);
-
-//        drawerToggle.syncState();
-//        navigationView.setNavigationItemSelectedListener(null);
-    }
-
-    private void setupViewpager() {
-        ArrayList<ArrayList<Coin>> mainMenu = mockData();
-        viewPager.setAdapter(new ViewpagerAdapter(getSupportFragmentManager(), mainMenu));
-
-        viewPager_tab.setupWithViewPager(viewPager);
-    }
-
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
         drawerToggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void setupViewpager(Bundle savedInstanceState) {
+        ArrayList<ArrayList<Coin>> mainMenu = mockData();
+        ViewpagerAdapter viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager(),
+                mainMenu, viewPager_tab);
+        viewPager.setAdapter(viewpagerAdapter);
+        viewPager_tab.setupWithViewPager(viewPager);
+        viewpagerAdapter.setupTabLayout();
     }
 
     @Override
@@ -94,6 +106,17 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        return false;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //Save the star menu;
     }
 
     private ArrayList<ArrayList<Coin>> mockData() {

@@ -22,7 +22,7 @@
         android:id="@+id/marketList_item_price_txv"
         android:layout_width="@dimen/price_txv_size"
         android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/spacing_small"
+        android:layout_marginRight="@dimen/spacing_medium"
         android:gravity="center_vertical|right"
         android:textSize="@dimen/textSize_medium"
         android:maxLines="1"

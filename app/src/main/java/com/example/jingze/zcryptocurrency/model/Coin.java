@@ -12,6 +12,10 @@ public class Coin implements Parcelable{
     public Double priceUSD;
     public Double dailyChange;
 
+    public  Coin() {
+
+    }
+
     protected Coin(Parcel in) {
         coinType = in.readString();
         currencyType = in.readString();

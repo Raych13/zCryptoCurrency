@@ -67,7 +67,6 @@ public class MarketListFragment extends Fragment{
         adapter = new MarketListAdapter(this, subMenu, new InfiniteAdapter.LoadMoreListener() {
             @Override
             public void onLoadMore() {
-
             }
         });
         recyclerView.setAdapter(adapter);

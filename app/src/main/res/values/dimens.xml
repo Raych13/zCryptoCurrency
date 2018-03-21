@@ -13,7 +13,7 @@
     <dimen name="icon_medium">32dp</dimen>
     <dimen name="icon_large">48dp</dimen><!--StartUp-->
     <dimen name="icon_xlarge">60dp</dimen>
-    <dimen name="icon_jumbo">160dp</dimen>
+    <dimen name="icon_jumbo">72dp</dimen>
 
     <dimen name="textSize_micro">12sp</dimen>
     <dimen name="textSize_small">14sp</dimen><!--MainBody-->
