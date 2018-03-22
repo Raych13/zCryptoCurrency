@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
@@ -23,7 +22,7 @@ import okio.ByteString;
  * Created by Jingze HUANG on Mar.20, 2018.
  */
 
-public class WebSocketManager {
+public class WebSocketManager extends WebManager{
 
     private final static int RECONNECT_INTERVAL = 5 * 1000;    //Reconnection interval
     private final static long RECONNECT_MAX_TIME = 60 * 1000;   //Maximum reconnection time
@@ -36,8 +35,18 @@ public class WebSocketManager {
     private boolean isManualClose = false;              //Whether you close connection manually.
     private int reconnectionCount = 0;                  //Record of the number of trying to reconnect.
     private Lock mLock;
+    private WebSocketExtraListener webSocketExtraListener;
     private Handler mainThreadHandler;
     private Handler dataThreadHandler;
+    private Runnable reconnectRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onReconnect();
+            }
+            buildConnection();
+        }
+    };
 
     //Override WebSocketListener to create my own one.
     private WebSocketListener mWebSocketListener = new WebSocketListener() {
@@ -46,68 +55,65 @@ public class WebSocketManager {
             mWebSocket = webSocket;
             setCurrentStatus(Status.CONNECTED);
             connected();
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onOpen(response);
+            }
         }
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
             Message msg = mainThreadHandler.obtainMessage(0, text);
             mainThreadHandler.sendMessage(msg);
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onMessage(text);
+            }
             Log.i("Raych", "Get text-Message from WebSocket" + text);
         }
 
         @Override
         public void onMessage(WebSocket webSocket, ByteString bytes) {
-            Log.i("Raych", "Get bytes-Message from WebSocket: ");
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onMessage(bytes);
+            }
+        }
+
+        @Override
+        public void onClosing(WebSocket webSocket, int code, String reason) {
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onClosing(code, reason);
+            }
         }
 
         @Override
         public void onClosed(WebSocket webSocket, int code, String reason) {
-//            Message m = statusHandler.obtainMessage(0, ConnectionStatus.DISCONNECTED);
-//            statusHandler.sendMessage(m);
+            if (client != null) {
+                client.dispatcher().cancelAll();
+            }
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onClosed(code,reason);
+            }
         }
 
         @Override
-        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-            reconnect();
+        public void onFailure(WebSocket webSocket, Throwable throwable, Response response) {
+            attemptReconnect();
+            if (webSocketExtraListener != null) {
+                webSocketExtraListener.onFailure(throwable,response);
+            }
         }
     };
 
-    public WebSocketManager(Builder builder) {
+    //Constructor
+    WebSocketManager(Builder builder) {
         this.mContext = builder.mContext;
         this.serverURL = builder.serverURL;
         this.isNeedReconnect = builder.isNeedReconnect;
         this.client = builder.client;
         this.mainThreadHandler = builder.mainThreadHandler;
         this.dataThreadHandler = builder.dataThreadHandler;
+        this.webSocketExtraListener = builder.webSocketExtraListener;
         this.mLock = new ReentrantLock();
     }
-
-//    public ServerConnection(String url) {
-//        client = new OkHttpClient.Builder()
-//                .readTimeout(3, TimeUnit.SECONDS)
-//                .retryOnConnectionFailure(true)
-//                .build();
-//        serverURL = url;
-//        isConnected = false;
-//    }
-
-//    public void connect(ServerConnection.HandlerListener listener) {
-//        Request request = new Request.Builder()
-//                .url(serverURL)
-//                .build();
-//        webSocket = client.newWebSocket(request, new ServerConnection.ZWebSocketListener());
-//
-//        handlerListener = listener;
-//        messageHandler = new Handler(new Handler.Callback() {
-//            @Override
-//            public boolean handleMessage(Message message) {
-//                handlerListener.handlerNewMessage((String) message.obj);
-//                return true;
-//            }
-//        });
-//        isConnected = true;
-//        Log.i("Raych", "Method connect() is called.");
-//    }
 
 //    public void disconnect() {
 //        isConnected = false;
@@ -120,43 +126,42 @@ public class WebSocketManager {
 //    }
 
     //Methods are relative to mCurrencyStatus;
+    @Override
     public synchronized boolean isConnected() {
         return mCurrentStatus == Status.CONNECTED;
     }
 
+    @Override
     public synchronized int getCurrentStatus() {
         return mCurrentStatus;
     }
 
+    @Override
     public synchronized void setCurrentStatus(int currentStatus) {
         this.mCurrentStatus = currentStatus;
     }
 
     // Public methods of managing connection.
+    @Override
     public void startConnect() {
         isManualClose = false;
         buildConnection();
     }
 
+    @Override
     public void stopConnect() {
         isManualClose = true;
         disconnect();
     }
 
-    public boolean send(Object msg) {
-        boolean isSend = false;
-        if (mWebSocket != null && mCurrentStatus == Status.CONNECTED) {
-            if (msg instanceof String) {
-                isSend = mWebSocket.send((String) msg);
-            } else if (msg instanceof ByteString) {
-                isSend = mWebSocket.send((ByteString) msg);
-            }
-            //Reconnect when fail to send message
-            if (!isSend) {
-                reconnect();
-            }
-        }
-        return isSend;
+    @Override
+    public boolean sendMessage(String msg) {
+        return send(msg);
+    }
+
+    @Override
+    public boolean sendMessage(ByteString byteString) {
+        return send(byteString);
     }
 
     //Private methods below:
@@ -168,7 +173,7 @@ public class WebSocketManager {
         switch (getCurrentStatus()) {
             case Status.CONNECTED:
             case Status.CONNECTING:
-                return;
+                break;
             default:
                 setCurrentStatus(Status.CONNECTING);
                 initiateWebSocket();
@@ -196,7 +201,7 @@ public class WebSocketManager {
                 mLock.unlock();
             }
         } catch (InterruptedException e) {
-
+                Log.e("Raych", "initiateWebSocket() method: InterruptedException");
         }
     }
 
@@ -204,27 +209,23 @@ public class WebSocketManager {
         cancelReconnect();
     }
 
-    // To be done
     private void disconnect() {
         if (getCurrentStatus() == Status.DISCONNECTED) {
             return;
         }
         cancelReconnect();
-        if (client != null) {
-            client.dispatcher().cancelAll();
-        }
         if (mWebSocket != null) {
             boolean isClose = mWebSocket.close(Status.CODE.NORMAL_CLOSE, Status.REASON.NORMAL_CLOSE);
-
-//            if (isClose) {
-//                if ()
-//            }
+            if (isClose) {
+                if (webSocketExtraListener != null) {
+                    webSocketExtraListener.onClosed(Status.CODE.ABNORMAL_CLOSE, Status.REASON.ABNORMAL_CLOSE);
+                }
+            }
         }
         setCurrentStatus(Status.DISCONNECTED);
     }
 
-    // To be done!!!!!!!
-    private void reconnect() {
+    private void attemptReconnect() {
         if (!isNeedReconnect || isManualClose) {
             return;
         }
@@ -235,34 +236,62 @@ public class WebSocketManager {
         setCurrentStatus(Status.RECONNECTING);
 
         long delay = reconnectionCount * RECONNECT_INTERVAL;
-//        ????????
-//        wsMainHandler
-//                .postDelayed(reconnectRunnable, delay > RECONNECT_MAX_TIME ? RECONNECT_MAX_TIME : delay);
+        dataThreadHandler.postDelayed(reconnectRunnable,
+                delay > RECONNECT_MAX_TIME ? RECONNECT_MAX_TIME : delay);
         reconnectionCount++;
     }
 
-    // To be done.
     private void cancelReconnect() {
-//        wsMainHandler.removeCallbacks(reconnectRunnable);
+        dataThreadHandler.removeCallbacks(reconnectRunnable);
         reconnectionCount = 0;
     }
 
     //Check if the networkService is available. (isNetworkConnected)
     //To be done: when network is closed.
-    private boolean isNetworkServiceAvailable(Context context) {
+    private boolean isNetworkServiceAvailable(final Context context) {
         if (context != null) {
             ConnectivityManager mConnectivityManager = (ConnectivityManager) context
                     .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo mNetworkInfo = mConnectivityManager
                     .getActiveNetworkInfo();
             if (mNetworkInfo != null) {
-                boolean availability = mNetworkInfo.isAvailable();
-                return availability;
-            } else {
-                //When network is not available.
+                return mNetworkInfo.isAvailable();
             }
+           //when network is closed.
         }
         return false;
+    }
+
+    private boolean send(Object msg) {
+        boolean isSend = false;
+        if (mWebSocket != null && mCurrentStatus == Status.CONNECTED) {
+            if (msg instanceof String) {
+                isSend = mWebSocket.send((String) msg);
+            } else if (msg instanceof ByteString) {
+                isSend = mWebSocket.send((ByteString) msg);
+            }
+            //Reconnect when fail to send message
+            if (!isSend) {
+                attemptReconnect();
+            }
+        }
+        return isSend;
+    }
+
+    public interface WebSocketExtraListener{
+        void onOpen(Response response);
+
+        void onMessage(String text);
+
+        void onMessage(ByteString bytes);
+
+        void onReconnect();
+
+        void onClosing(int code, String reason);
+
+        void onClosed(int code, String reason);
+
+        void onFailure(Throwable throwable, Response response);
     }
 
     public static final class Builder {
@@ -272,6 +301,7 @@ public class WebSocketManager {
         private Handler mainThreadHandler;
         private Handler dataThreadHandler;
         private OkHttpClient client;
+        private WebSocketExtraListener webSocketExtraListener;
 
         public Builder(Context context,
                        Handler mainThreadHandler,
@@ -291,33 +321,23 @@ public class WebSocketManager {
             return this;
         }
 
-        public Builder needReconnect(boolean isNeedReconnect) {
+        public Builder isNeedReconnect(boolean isNeedReconnect) {
             this.isNeedReconnect = isNeedReconnect;
+            return this;
+        }
+
+        public Builder okHttpClient(OkHttpClient client) {
+            this.client = client;
+            return this;
+        }
+
+        public Builder webSocketExtraListener(WebSocketExtraListener webSocketExtraListener) {
+            this.webSocketExtraListener = webSocketExtraListener;
             return this;
         }
 
         public WebSocketManager build() {
             return new WebSocketManager(this);
-        }
-    }
-
-    //The codes of status.
-    public static class Status {
-        public final static int DISCONNECTED = -1;
-        public final static int CONNECTING = 0;
-        public final static int CONNECTED = 1;
-        public final static int RECONNECTING = 2;
-
-
-        class CODE {
-
-            public final static int NORMAL_CLOSE = 1000;
-            public final static int ABNORMAL_CLOSE = 1001;
-        }
-
-        class REASON {
-            public final static String NORMAL_CLOSE = "normal close";
-            public final static String ABNORMAL_CLOSE = "abnormal close";
         }
     }
 }
