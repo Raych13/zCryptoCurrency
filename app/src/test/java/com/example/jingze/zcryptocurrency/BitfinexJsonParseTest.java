@@ -1,22 +1,23 @@
-package com.example.jingze.zcryptocurrency.model.bitfinex;
-
+package com.example.jingze.zcryptocurrency;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
 import com.google.gson.reflect.TypeToken;
 
+import org.junit.Test;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class BitfinexDataArray {
+import static org.junit.Assert.assertEquals;
 
-    public static HashMap<Integer, Integer> redirectionMap = new HashMap<>();
+/**
+ * Created by Jingze HUANG on Mar.23, 2018.
+ */
 
-    public static boolean isDataArray(String data) {
-        return (data.charAt(0) == '[');
-    }
-
-    public static Coin parseDataArray(String data) {
+public class BitfinexJsonParseTest {
+    @Test
+    public void parseDaraArray() {
+        String data = "[4,[7839.9,39.98836294,7840,718.34207625,-645.3,-0.076,7840,51239.69240822,8498.1,7728.1]]";
         ArrayList<Object> dataArray = ModelUtils.toObject(data,  new TypeToken<ArrayList<Object>>(){});
         Coin newCoin = new Coin();
         Integer chanId;
@@ -26,19 +27,11 @@ public class BitfinexDataArray {
             if (dataArray.get(1).getClass().equals(ArrayList.class)) {
                 coinData = (ArrayList<Double>) dataArray.get(1);
             } else {
-                return newCoin;
             }
         } catch (Exception bitfinexDataArrayParseException) {
 
         }
-        return new Coin();
-    }
 
-    public static int getMenuPosition(int chanId) {
-        if (redirectionMap.containsKey(chanId)) {
-            return redirectionMap.get(chanId);
-        }
-//        int position =position
-        return -1;
+        assertEquals(1, 1);
     }
 }

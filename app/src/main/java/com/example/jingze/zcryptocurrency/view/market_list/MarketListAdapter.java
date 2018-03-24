@@ -50,19 +50,19 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         MarketListViewHolder marketListViewHolder = (MarketListViewHolder) holder;
         final Coin coin = getData().get(position);
 
-        String title = coin.coinType + " - " + coin.currencyType;
-        String price = CoinUtils.priceWithCurrencySymbol(coin.priceUSD, coin.coinType);
-        String changeRate = CoinUtils.convertToPercentage(coin.dailyChange);
+        String title = coin.getCoinType() + " - "+ coin.getCurrencyType();
+        String price = CoinUtils.priceWithCurrencySymbol(coin.getPrice(), coin.getCurrencyType());
+        String changeRate = CoinUtils.convertToPercentage(coin.getDailyChange());
 
         marketListViewHolder.item_title_txv.setText(title);
         marketListViewHolder.item_price_txv.setText(price);
 
-        if (coin.dailyChange != null) {
-            if (coin.dailyChange > 0.00) {
+        if (coin.getDailyChange() != null) {
+            if (coin.getDailyChange() > 0.00) {
                 marketListViewHolder.item_change_bg.setBackgroundColor(priceGreen);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesUp);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
-            } else if (coin.dailyChange < 0.00) {
+            } else if (coin.getDailyChange() < 0.00) {
                 marketListViewHolder.item_change_bg.setBackgroundColor(priceRed);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesDown);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);

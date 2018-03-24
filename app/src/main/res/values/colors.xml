@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#EEDD00</color>
-    <color name="colorPrimaryDark">#00ffffff</color>
+    <color name="colorPrimaryDark">#00000000</color>
     <color name="colorAccent">#FFFFFFDD</color>
-    <color name="statusBarColor">#00000000</color>
+    <color name="statusBarColor">#000000</color>
 
     <color name="golden">#EEDD00</color>
     <color name="lemonYellow">#FFEE33</color>
     <color name="pureWhite">#FFFFFFFF</color>
     <color name="yellowWhite">#FFFFFFDD</color>
 
-    <color name="place_holder_bg">#33000000</color>
+    <color name="place_holder_bg">#00000000</color>
 
     <color name="main_bg">#333333</color>
 
     <color name="price_green">#AA00CC33</color>
     <color name="price_red">#AACC3333</color>
-    <color name="price_grey">#AAA0A0A0</color>
+    <color name="price_grey">#aaa0a0a0</color>
     <color name="item_text_color">#FFFFFFFF</color>
 </resources>

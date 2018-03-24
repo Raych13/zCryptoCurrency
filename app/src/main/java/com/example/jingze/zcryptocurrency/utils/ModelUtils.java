@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class ModelUtils {
 
     private static Gson gson = new Gson();
+    private static Gson gsonExpose = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
     private static String PREF_NAME = "models";
 
     public static void save(Context context, String key, Object object) {
@@ -37,6 +39,10 @@ public class ModelUtils {
 
     public static <T> String toString(T object, TypeToken<T> typeToken) {
         return gson.toJson(object, typeToken.getType());
+    }
+
+    public static <T> String toStringExpose(T object, TypeToken<T> typeToken) {
+        return gsonExpose.toJson(object, typeToken.getType());
     }
 
 }

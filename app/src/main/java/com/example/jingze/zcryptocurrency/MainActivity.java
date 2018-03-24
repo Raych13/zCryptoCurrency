@@ -1,6 +1,7 @@
 package com.example.jingze.zcryptocurrency;
 
 import android.content.res.Configuration;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
+import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
 import com.example.jingze.zcryptocurrency.view.ViewpagerAdapter;
 import com.google.gson.reflect.TypeToken;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @BindView((R.id.main_viewpager_tab)) TabLayout viewPager_tab;
 
     private ActionBarDrawerToggle drawerToggle;
+    private ViewpagerAdapter viewpagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Log.i("Taych", "Is: " + (savedInstanceState == null));
         setupUI(savedInstanceState);
+        Handler handler = new Handler(getMainLooper());
     }
 
     private void setupUI(Bundle savedInstanceState) {
@@ -80,12 +84,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setupViewpager(Bundle savedInstanceState) {
-        ArrayList<ArrayList<Coin>> mainMenu = mockData();
-        ViewpagerAdapter viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager(),
+        ArrayList<CoinMenu> mainMenu = mockData();
+        viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager(),
                 mainMenu, viewPager_tab);
         viewPager.setAdapter(viewpagerAdapter);
         viewPager_tab.setupWithViewPager(viewPager);
         viewpagerAdapter.setupTabLayout();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewpagerAdapter.getItem(0);
     }
 
     @Override
@@ -119,9 +129,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Save the star menu;
     }
 
-    private ArrayList<ArrayList<Coin>> mockData() {
-        String jsonListList = "[[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"priceUSD\":13000.13,\"dailyChange\":0.3333},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"priceUSD\":1333.13,\"dailyChange\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"priceUSD\":393.13,\"dailyChange\":0.3131}],[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"priceUSD\":13000.13,\"dailyChange\":0.3333},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"priceUSD\":1333.13,\"dailyChange\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"priceUSD\":393.13,\"dailyChange\":0.3131},{\"coinType\":\"NEM\",\"currencyType\":\"USD\",\"priceUSD\":0.31,\"dailyChange\":-0.13},{\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"priceUSD\":0.74,\"dailyChange\":0.0}]]";
-        ArrayList<ArrayList<Coin>> total = ModelUtils.toObject(jsonListList, new TypeToken<ArrayList<ArrayList<Coin>>>(){});
+    private ArrayList<CoinMenu> mockData() {
+        //???Json is Not corret
+        String jsonListList = "[{\"name\":\"Favorite\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChange\":0.3133},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChange\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChange\":0.3113}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChange\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChange\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChange\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChange\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChange\":-0.133}]}]";
+        ArrayList<CoinMenu> total = ModelUtils.toObject(jsonListList, new TypeToken<ArrayList<CoinMenu>>(){});
         return total;
     }
 }

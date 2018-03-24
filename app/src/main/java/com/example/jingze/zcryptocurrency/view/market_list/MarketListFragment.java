@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.example.jingze.zcryptocurrency.R;
 import com.example.jingze.zcryptocurrency.model.Coin;
+import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.view.base.InfiniteAdapter;
 import com.example.jingze.zcryptocurrency.view.base.SpaceItemDecoration;
 
@@ -29,9 +30,9 @@ public class MarketListFragment extends Fragment{
 
     private MarketListAdapter adapter;
 
-    public static MarketListFragment getInstance(ArrayList<Coin> data) {
+    public static MarketListFragment getInstance(CoinMenu coinMenu) {
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList(BUNDLE_KEY_STRING, data);
+        bundle.putParcelableArrayList(BUNDLE_KEY_STRING, coinMenu.getData());
 
         MarketListFragment fragment = new MarketListFragment();
         fragment.setArguments(bundle);

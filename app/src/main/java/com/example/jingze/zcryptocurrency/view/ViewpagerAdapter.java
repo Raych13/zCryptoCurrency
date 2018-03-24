@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.example.jingze.zcryptocurrency.R;
 import com.example.jingze.zcryptocurrency.model.Coin;
+import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.view.market_list.MarketListFragment;
 
 import java.lang.reflect.Array;
@@ -15,11 +16,11 @@ import java.util.List;
 
 public class ViewpagerAdapter extends FragmentPagerAdapter{
 
-    private ArrayList<ArrayList<Coin>> mainMenu;
+    private ArrayList<CoinMenu> mainMenu;
     private TabLayout tabLayout;
 
     public ViewpagerAdapter(FragmentManager fm,
-                            ArrayList<ArrayList<Coin>> mainMenu,
+                            ArrayList<CoinMenu> mainMenu,
                             TabLayout tabLayout) {
         super(fm);
         this.mainMenu = mainMenu;
@@ -27,8 +28,8 @@ public class ViewpagerAdapter extends FragmentPagerAdapter{
     }
 
     @Override
-    public Fragment getItem(int position) {
-        ArrayList<Coin> subMenu = mainMenu.get(position);
+    public Fragment getItem(int pagePosition) {
+        CoinMenu subMenu = mainMenu.get(pagePosition);
         return (Fragment) MarketListFragment.getInstance(subMenu);
     }
 
@@ -36,6 +37,8 @@ public class ViewpagerAdapter extends FragmentPagerAdapter{
     public int getCount() {
         return mainMenu.size();
     }
+
+    
 
     public void setupTabLayout() {
         tabLayout.setBackgroundColor(
