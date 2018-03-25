@@ -62,12 +62,12 @@ public class WebSocketManager extends WebManager{
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
-            Message msg = mainThreadHandler.obtainMessage(0, text);
-            mainThreadHandler.sendMessage(msg);
+            Log.i("Raych", "Get text-Message from WebSocket" + text);
+            Message msg = dataThreadHandler.obtainMessage(0, text);
+            dataThreadHandler.sendMessage(msg);
             if (webSocketExtraListener != null) {
                 webSocketExtraListener.onMessage(text);
             }
-            Log.i("Raych", "Get text-Message from WebSocket" + text);
         }
 
         @Override
@@ -113,6 +113,7 @@ public class WebSocketManager extends WebManager{
         this.dataThreadHandler = builder.dataThreadHandler;
         this.webSocketExtraListener = builder.webSocketExtraListener;
         this.mLock = new ReentrantLock();
+        Log.i("Raych", "WebSocketManager is created.");
     }
 
 //    public void disconnect() {
@@ -144,18 +145,21 @@ public class WebSocketManager extends WebManager{
     // Public methods of managing connection.
     @Override
     public void startConnect() {
+        Log.i("Raych", "WebSocketManager: startConnect() is called.");
         isManualClose = false;
         buildConnection();
     }
 
     @Override
     public void stopConnect() {
+        Log.i("Raych", "WebSocketManager: stopConnect() is called.");
         isManualClose = true;
         disconnect();
     }
 
     @Override
     public boolean sendMessage(String msg) {
+        Log.i("Raych", "WebSocketManager: sendMessage() is called. msg: " + msg);
         return send(msg);
     }
 
@@ -167,6 +171,7 @@ public class WebSocketManager extends WebManager{
     //Private methods below:
     private synchronized void buildConnection() {
         if (!isNetworkServiceAvailable(mContext)) {
+            Log.e("Raych", "NetworkServiceUnavailable.");
             setCurrentStatus(Status.DISCONNECTED);
             return;
         }
@@ -206,6 +211,7 @@ public class WebSocketManager extends WebManager{
     }
 
     private void connected() {
+        Log.i("Raych", "WebSocketManager: connected() is called.");
         cancelReconnect();
     }
 
@@ -230,6 +236,7 @@ public class WebSocketManager extends WebManager{
             return;
         }
         if (!isNetworkServiceAvailable(mContext)) {
+            Log.e("Raych", "NetworkServiceUnavailable.");
             setCurrentStatus(Status.DISCONNECTED);
             return;
         }

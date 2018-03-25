@@ -18,6 +18,7 @@ public class Coin implements Parcelable{
     @Expose
     private Double price;
     @Expose
+    private Double dailyChangeRate;
     private Double dailyChange;
     private OnChangedListener onChangedListener;
 
@@ -34,7 +35,7 @@ public class Coin implements Parcelable{
         this.coinType = builder.coinType;
         this.currencyType = builder.currencyType;
         this.price = builder.price;
-        this.dailyChange = builder.dailyChange;
+        this.dailyChangeRate = builder.dailyChange;
     }
 
     //Getters and Setters
@@ -50,23 +51,23 @@ public class Coin implements Parcelable{
         return price;
     }
 
-    public synchronized boolean setPriceUSD(Double priceUSD) {
+    public synchronized boolean setPrice(Double priceUSD) {
         this.price = priceUSD;
         return false;
     }
 
-    public Double getDailyChange() {
-        return dailyChange;
+    public Double getDailyChangeRate() {
+        return dailyChangeRate;
     }
 
-    public synchronized boolean setDailyChange(Double dailyChange) {
-        this.dailyChange = dailyChange;
+    public synchronized boolean setDailyChangeRate(Double dailyChangeRate) {
+        this.dailyChangeRate = dailyChangeRate;
         return false;
     }
 
-    public synchronized boolean setPriceAndRate(Double price, Double dailyChange) {
+    public synchronized boolean setPriceAndRate(Double price, Double dailyChangeRate) {
         this.price = price;
-        this.dailyChange = dailyChange;
+        this.dailyChangeRate = dailyChangeRate;
         if (onChangedListener != null) {
             onChangedListener.onPriceOrRateChange(positionInMenu);
         }
@@ -101,9 +102,9 @@ public class Coin implements Parcelable{
             price = in.readDouble();
         }
         if (in.readByte() == 0) {
-            dailyChange = null;
+            dailyChangeRate = null;
         } else {
-            dailyChange = in.readDouble();
+            dailyChangeRate = in.readDouble();
         }
     }
 
@@ -123,11 +124,11 @@ public class Coin implements Parcelable{
             dest.writeByte((byte) 1);
             dest.writeDouble(price);
         }
-        if (dailyChange == null) {
+        if (dailyChangeRate == null) {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeDouble(dailyChange);
+            dest.writeDouble(dailyChangeRate);
         }
     }
 
@@ -155,10 +156,9 @@ public class Coin implements Parcelable{
         private Double dailyChange;
 
         public Builder(String coinType, String currencyType) {
-            this.coinType = coinType;
-            this.currencyType = currencyType;
+            this.coinType = coinType.toUpperCase();
+            this.currencyType = currencyType.toUpperCase();
         }
-
 
         public Builder setPrice(Double price) {
             this.price = price;

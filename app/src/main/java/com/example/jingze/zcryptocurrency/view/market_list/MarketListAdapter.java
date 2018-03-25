@@ -52,17 +52,17 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
 
         String title = coin.getCoinType() + " - "+ coin.getCurrencyType();
         String price = CoinUtils.priceWithCurrencySymbol(coin.getPrice(), coin.getCurrencyType());
-        String changeRate = CoinUtils.convertToPercentage(coin.getDailyChange());
+        String changeRate = CoinUtils.convertToPercentage(coin.getDailyChangeRate());
 
         marketListViewHolder.item_title_txv.setText(title);
         marketListViewHolder.item_price_txv.setText(price);
 
-        if (coin.getDailyChange() != null) {
-            if (coin.getDailyChange() > 0.00) {
+        if (coin.getDailyChangeRate() != null) {
+            if (coin.getDailyChangeRate() > 0.00) {
                 marketListViewHolder.item_change_bg.setBackgroundColor(priceGreen);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesUp);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
-            } else if (coin.getDailyChange() < 0.00) {
+            } else if (coin.getDailyChangeRate() < 0.00) {
                 marketListViewHolder.item_change_bg.setBackgroundColor(priceRed);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesDown);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);

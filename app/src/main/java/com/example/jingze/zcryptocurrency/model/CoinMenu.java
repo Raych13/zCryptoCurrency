@@ -2,12 +2,11 @@ package com.example.jingze.zcryptocurrency.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Jingze HUANG on Mar.22, 2018.
@@ -20,12 +19,11 @@ public class CoinMenu implements Parcelable{
     private String url;
     @Expose
     private ArrayList<Coin>  data;
-    private Map<String, Coin> stubByCode;
-//    private Map<Integer, String> stubFromCoin;
+    public Directory<Integer> directory;
     boolean orderChangedLock;
     private OnChangeListener onChangeListener;
 
-    interface OnChangeListener {
+    public interface OnChangeListener {
         void onCoinChanged(int position);
         void onDataOrderChanged();
     }
@@ -40,7 +38,7 @@ public class CoinMenu implements Parcelable{
         this.url = url;
         this.data = data;
         orderChangedLock = false;
-        stubByCode = new HashMap<>();
+        this.directory = new Directory<>();
         assignPositionToCoin();
     }
 
@@ -57,11 +55,11 @@ public class CoinMenu implements Parcelable{
         return url;
     }
 
-    public Coin get(int position) {
+    public Coin getCoin(int position) {
         return data.get(position);
     }
 
-    public synchronized boolean set(int position, Coin coin) {
+    public synchronized boolean setCoin(int position, Coin coin) {
         if (!orderChangedLock && coin != null) {
             data.set(position, coin);
             if (onChangeListener != null) {
@@ -94,20 +92,48 @@ public class CoinMenu implements Parcelable{
         return data.size();
     }
 
-    //Operations of StubFromCode
-    public boolean record(String code, String coinType, String currencyType) {
-        int position = getPosition(coinType, currencyType);
-        if (position != -1) {
-            stubByCode.put(code, data.get(position));
-            return true;
+    //
+    public void updateCoinPositionToCoin() {
+        for (int i = 0; i < data.size(); i++) {
+            data.get(i).setPositionInMenu(i);
         }
-        return false;
     }
 
-    public Coin getCoinByCode(String code) {
-        return stubByCode.get(code);
+    //Data Operations
+    public void buildConnection(Coin coin, Integer chanId) {
+        int position = getPosition(coin.getCoinType(), coin.getCurrencyType());
+        if (position != -1 && position < data.size()) {
+            if (directory == null) {
+                directory = new Directory<>();
+            }
+            directory.write(data.get(position), chanId);
+        }
     }
 
+    public void updateCoin(int chanId, Coin newCoin) {
+        Log.i("Raych", "chanId: " + chanId + " is updated.");
+        Coin coinToBeUpdate = directory.getCoin(chanId);
+        coinToBeUpdate.setPriceAndRate(newCoin.getPrice(), newCoin.getDailyChangeRate());
+        if (onChangeListener != null) {
+            Integer position = coinToBeUpdate.getPositionInMenu();
+            if (position != null) {
+                onChangeListener.onCoinChanged(position);
+            }
+        }
+    }
+
+    public void heartbeatting(int chanId) {
+        Log.i("Raych", "chanId: " + chanId + " is updated.");
+        Coin coinToBeUpdate = directory.getCoin(chanId);
+        if (onChangeListener != null) {
+            Integer position = coinToBeUpdate.getPositionInMenu();
+            if (position != null) {
+                onChangeListener.onCoinChanged(position);
+            }
+        }
+    }
+
+    //setOnChangeListener
     public void setOnChangeListener(OnChangeListener onChangeListener) {
         this.onChangeListener = onChangeListener;
     }
@@ -146,7 +172,6 @@ public class CoinMenu implements Parcelable{
     };
 
     //Private Methods
-
     private int getPosition(String coinType, String currencyType) {
         int cursor = 0;
         for (; cursor < data.size(); cursor++) {

@@ -1,7 +1,11 @@
 package com.example.jingze.zcryptocurrency;
 
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
@@ -39,6 +43,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ActionBarDrawerToggle drawerToggle;
     private ViewpagerAdapter viewpagerAdapter;
+    private Looper dataThreadLooper;
+    private Handler dataThreadHandler;
+    private ArrayList<CoinMenu> mainMenu = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +54,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ButterKnife.bind(this);
 
         Log.i("Taych", "Is: " + (savedInstanceState == null));
+        HandlerThread dataThread = new HandlerThread("DataThread", Process.THREAD_PRIORITY_BACKGROUND);
+        dataThread.start();
+        dataThreadLooper = dataThread.getLooper();
+        dataThreadHandler = new Handler(dataThreadLooper);
+        mainMenu = mockData();
         setupUI(savedInstanceState);
-        Handler handler = new Handler(getMainLooper());
     }
 
     private void setupUI(Bundle savedInstanceState) {
@@ -57,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupActionBar();
         setupViewpager(savedInstanceState);
     }
-
 
     private void setupActionBar() {
         //If you add toolbar when you call ActionBarDrawerToggle method, you can skip the two steps below.
@@ -84,12 +94,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setupViewpager(Bundle savedInstanceState) {
-        ArrayList<CoinMenu> mainMenu = mockData();
         viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager(),
-                mainMenu, viewPager_tab);
+                viewPager_tab, dataThreadHandler, mainMenu);
         viewPager.setAdapter(viewpagerAdapter);
         viewPager_tab.setupWithViewPager(viewPager);
-        viewpagerAdapter.setupTabLayout();
+        viewpagerAdapter.setupTabLayout(mainMenu);
     }
 
     @Override
@@ -131,7 +140,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ArrayList<CoinMenu> mockData() {
         //???Json is Not corret
-        String jsonListList = "[{\"name\":\"Favorite\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChange\":0.3133},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChange\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChange\":0.3113}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChange\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChange\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChange\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChange\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChange\":-0.133}]}]";
+//        String jsonListList = "[{\"name\":\"Favorite\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3133},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3113}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChangeRate\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChangeRate\":-0.133}]}]";
+        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChangeRate\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChangeRate\":-0.133}]}]";
+//        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639}]}]";
         ArrayList<CoinMenu> total = ModelUtils.toObject(jsonListList, new TypeToken<ArrayList<CoinMenu>>(){});
         return total;
     }
