@@ -2,11 +2,9 @@ package com.example.jingze.zcryptocurrency.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
-import com.example.jingze.zcryptocurrency.model.CoinMenu;
-import com.example.jingze.zcryptocurrency.net.Bitfinex;
+import com.example.jingze.zcryptocurrency.net.BitfinexManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -16,16 +14,15 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class ModelUtils {
 
     private static Gson gson = new Gson();
     public static final Gson GSON_EXPOSS = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-    public static final Gson GSON_BITFINEX = new GsonBuilder().registerTypeAdapter(Bitfinex.class, new TypeAdapter<Bitfinex>() {
+    public static final Gson GSON_BITFINEX_EVENT = new GsonBuilder().registerTypeAdapter(BitfinexManager.Event.class, new TypeAdapter<BitfinexManager.Event>() {
 
         @Override
-        public void write(JsonWriter out, Bitfinex value) throws IOException {
+        public void write(JsonWriter out, BitfinexManager.Event value) throws IOException {
             if (value == null) {
                 out.nullValue();
                 return;
@@ -38,7 +35,7 @@ public class ModelUtils {
             out.name("pair").value(value.pair);
             out.name("version").value(value.version);
             if (value.platform != null) {
-                out.name("platform").value(ModelUtils.toString(value.platform, new TypeToken<Bitfinex.PlatformInfo>(){}));
+                out.name("platform").value(ModelUtils.toString(value.platform, new TypeToken<BitfinexManager.Event.PlatformInfo>(){}));
             }
             out.name("msg").value(value.msg);
             out.name("errorCode").value(value.errorCode);
@@ -50,7 +47,7 @@ public class ModelUtils {
         }
 
         @Override
-        public Bitfinex read(JsonReader in) throws IOException {
+        public BitfinexManager.Event read(JsonReader in) throws IOException {
             return null;
         }
 

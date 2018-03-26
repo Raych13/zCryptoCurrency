@@ -23,7 +23,7 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
     private static Drawable goesUp;
     private static Drawable goesDown;
     private static Drawable goesFlat;
-    private static final int ITEMS_PER_PAGE = 13;
+    private static final int ITEMS_PER_PAGE = 10;
 
     public MarketListAdapter(@NonNull MarketListFragment marketListFragment, @NonNull List data, @NonNull LoadMoreListener loadMoreListener) {
         super(marketListFragment.getContext(), data, loadMoreListener, data.size() > ITEMS_PER_PAGE);

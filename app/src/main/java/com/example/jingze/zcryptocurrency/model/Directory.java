@@ -17,7 +17,7 @@ public class Directory<T> {
         coinToId = new HashMap<Coin, T>();
     }
 
-    public T getId(int coin) {
+    public T getId(Coin coin) {
         return coinToId.get(coin);
     }
 

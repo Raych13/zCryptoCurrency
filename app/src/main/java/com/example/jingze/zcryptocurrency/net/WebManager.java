@@ -1,5 +1,6 @@
 package com.example.jingze.zcryptocurrency.net;
 
+import okhttp3.WebSocket;
 import okio.ByteString;
 
 public abstract class WebManager {
@@ -9,6 +10,8 @@ public abstract class WebManager {
     abstract void startConnect();
 
     abstract void stopConnect();
+
+    abstract WebSocket getWebSocket();
 
     abstract int getCurrentStatus();
 

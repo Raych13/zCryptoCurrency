@@ -9,6 +9,7 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -19,10 +20,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
+import com.example.jingze.zcryptocurrency.utils.SnackBarUtils;
 import com.example.jingze.zcryptocurrency.view.ViewpagerAdapter;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,12 +62,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         dataThreadLooper = dataThread.getLooper();
         dataThreadHandler = new Handler(dataThreadLooper);
         mainMenu = mockData();
+        SnackBarUtils.setFindView(new SnackBarUtils.FindView() {
+            @Override
+            public View findView() {
+                return getWindow().getDecorView();
+            }
+        });
         setupUI(savedInstanceState);
     }
 
     private void setupUI(Bundle savedInstanceState) {
         setSupportActionBar(toolbar);
-        getSupportActionBar().setElevation(1);
+        getSupportActionBar().setElevation(10);
         setupActionBar();
         setupViewpager(savedInstanceState);
     }
@@ -141,8 +150,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ArrayList<CoinMenu> mockData() {
         //???Json is Not corret
 //        String jsonListList = "[{\"name\":\"Favorite\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3133},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.1313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3113}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChangeRate\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChangeRate\":-0.133}]}]";
-        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChangeRate\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChangeRate\":-0.133}]}]";
+//        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639},{\"coinType\":\"ETH\",\"currencyType\":\"USD\",\"price\":1333.13,\"dailyChangeRate\":0.6313},{\"coinType\":\"LTC\",\"currencyType\":\"USD\",\"price\":393.13,\"dailyChangeRate\":0.3836},{\"coinType\":\"EOS\",\"currencyType\":\"USD\",\"price\":7.98,\"dailyChangeRate\":0.066},{\"coinType\":\"ETC\",\"currencyType\":\"USD\",\"price\":20.13},{\"coinType\":\"XRP\",\"currencyType\":\"USD\",\"price\":0.5913,\"dailyChangeRate\":-0.133}]}]";
 //        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\",\"price\":13000.13,\"dailyChangeRate\":0.3639}]}]";
+
+        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"coinType\":\"XMR\",\"currencyType\":\"USD\"}]}]";
+
         ArrayList<CoinMenu> total = ModelUtils.toObject(jsonListList, new TypeToken<ArrayList<CoinMenu>>(){});
         return total;
     }

@@ -1,6 +1,5 @@
 package com.example.jingze.zcryptocurrency.view.market_list;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.Nullable;
@@ -16,12 +15,11 @@ import android.view.ViewGroup;
 import com.example.jingze.zcryptocurrency.R;
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
-import com.example.jingze.zcryptocurrency.utils.DataManager;
+import com.example.jingze.zcryptocurrency.net.BitfinexManager;
 import com.example.jingze.zcryptocurrency.view.base.InfiniteAdapter;
 import com.example.jingze.zcryptocurrency.view.base.SpaceItemDecoration;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,12 +75,15 @@ public class MarketListFragment extends Fragment{
             }
         });
         //Add New task
-        DataManager dataManager = new DataManager(getContext(), dataThreadLooper, adapter, coinMenu);
-        dataManager.connectToWeb();
+//        DataManager dataManager = new DataManager(getContext(), dataThreadLooper, adapter, coinMenu);
+//        dataManager.connectToWeb();
+        BitfinexManager bitfinexManager = new BitfinexManager(getContext(), dataThreadLooper, coinMenu);
+        bitfinexManager.buildWebSocket();
         coinMenu.setOnChangeListener(new CoinMenu.OnChangeListener() {
             @Override
             public void onCoinChanged(final int position) {
                 Log.i("RaychTest", "onCoinChanged() is reCalled");
+
                 recyclerView.post(new Runnable() {
                     @Override
                     public void run() {

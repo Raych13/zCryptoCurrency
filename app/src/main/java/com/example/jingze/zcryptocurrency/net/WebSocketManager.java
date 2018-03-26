@@ -1,11 +1,15 @@
 package com.example.jingze.zcryptocurrency.net;
 
+import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
+
+import com.example.jingze.zcryptocurrency.utils.SnackBarUtils;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -158,6 +162,11 @@ public class WebSocketManager extends WebManager{
     }
 
     @Override
+    WebSocket getWebSocket() {
+        return mWebSocket;
+    }
+
+    @Override
     public boolean sendMessage(String msg) {
         Log.i("Raych", "WebSocketManager: sendMessage() is called. msg: " + msg);
         return send(msg);
@@ -173,6 +182,7 @@ public class WebSocketManager extends WebManager{
         if (!isNetworkServiceAvailable(mContext)) {
             Log.e("Raych", "NetworkServiceUnavailable.");
             setCurrentStatus(Status.DISCONNECTED);
+            whenNetworkUnavailable();
             return;
         }
         switch (getCurrentStatus()) {
@@ -238,6 +248,7 @@ public class WebSocketManager extends WebManager{
         if (!isNetworkServiceAvailable(mContext)) {
             Log.e("Raych", "NetworkServiceUnavailable.");
             setCurrentStatus(Status.DISCONNECTED);
+            whenNetworkUnavailable();
             return;
         }
         setCurrentStatus(Status.RECONNECTING);
@@ -267,6 +278,13 @@ public class WebSocketManager extends WebManager{
            //when network is closed.
         }
         return false;
+    }
+
+    private void whenNetworkUnavailable() {
+        Runnable runnable = SnackBarUtils.getSnackBarRunnable("Network is unavailable.", Snackbar.LENGTH_LONG);
+        if (runnable != null) {
+            mainThreadHandler.post(runnable);
+        }
     }
 
     private boolean send(Object msg) {
