@@ -3,6 +3,7 @@ package com.example.jingze.zcryptocurrency.net;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
@@ -28,9 +29,15 @@ public abstract class BourseActivityManager {
         this.dataThreadLooper = dataThreadLooper;
         this.coinMenu = coinMenu;
         this.isFirstStart = true;
+        this.dataThreadHandler = new Handler(dataThreadLooper, new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
+                return handlerLogic(message);
+            }
+        });
     }
 
-    public abstract void buildWebSocket();
+    public abstract void startConnection();
 
     public abstract void subscribe(String channel, Coin coin);
 
@@ -38,5 +45,5 @@ public abstract class BourseActivityManager {
 
     public abstract void stop();
 
-    abstract void setDataThreadHandler();
+    abstract boolean handlerLogic(Message message);
 }

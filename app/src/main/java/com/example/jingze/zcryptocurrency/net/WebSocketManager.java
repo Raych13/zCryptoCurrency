@@ -27,10 +27,12 @@ import okio.ByteString;
  */
 
 public class WebSocketManager extends WebManager{
-
+    public final static int MESSAGE_TYPE_TEXT = 100;
+    public final static int MESSAGE_TYPE_BYTES = 101;
     private final static int RECONNECT_INTERVAL = 5 * 1000;    //Reconnection interval
     private final static long RECONNECT_MAX_TIME = 60 * 1000;   //Maximum reconnection time
     private Context mContext;
+    private String coinMenuName;
     private String serverURL;
     private OkHttpClient client;
     private WebSocket mWebSocket;
@@ -56,6 +58,7 @@ public class WebSocketManager extends WebManager{
     private WebSocketListener mWebSocketListener = new WebSocketListener() {
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
+            Log.i("Raych", "WebManager: "+ serverURL + ". "+ "Connected.");
             mWebSocket = webSocket;
             setCurrentStatus(Status.CONNECTED);
             connected();
@@ -66,8 +69,8 @@ public class WebSocketManager extends WebManager{
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
-            Log.i("Raych", "Get text-Message from WebSocket" + text);
-            Message msg = dataThreadHandler.obtainMessage(0, text);
+            Log.i("Raych", "Get Message(text) from WebSocket. ");
+            Message msg = dataThreadHandler.obtainMessage(MESSAGE_TYPE_TEXT, text);
             dataThreadHandler.sendMessage(msg);
             if (webSocketExtraListener != null) {
                 webSocketExtraListener.onMessage(text);
@@ -76,6 +79,9 @@ public class WebSocketManager extends WebManager{
 
         @Override
         public void onMessage(WebSocket webSocket, ByteString bytes) {
+            Log.i("Raych", "Get Message from(bytes) WebSocket.");
+            Message msg = dataThreadHandler.obtainMessage(MESSAGE_TYPE_BYTES, bytes);
+            dataThreadHandler.sendMessage(msg);
             if (webSocketExtraListener != null) {
                 webSocketExtraListener.onMessage(bytes);
             }
@@ -83,6 +89,7 @@ public class WebSocketManager extends WebManager{
 
         @Override
         public void onClosing(WebSocket webSocket, int code, String reason) {
+            Log.i("Raych", "WebManager: " + serverURL + ". onClosing() is called.");
             if (webSocketExtraListener != null) {
                 webSocketExtraListener.onClosing(code, reason);
             }
@@ -90,6 +97,7 @@ public class WebSocketManager extends WebManager{
 
         @Override
         public void onClosed(WebSocket webSocket, int code, String reason) {
+            Log.i("Raych", "WebManager: " + serverURL + ". onClosed() is called.");
             if (client != null) {
                 client.dispatcher().cancelAll();
             }
@@ -100,6 +108,7 @@ public class WebSocketManager extends WebManager{
 
         @Override
         public void onFailure(WebSocket webSocket, Throwable throwable, Response response) {
+            Log.i("Raych", "WebManager: " + serverURL + ". onFailure() is called.");
             attemptReconnect();
             if (webSocketExtraListener != null) {
                 webSocketExtraListener.onFailure(throwable,response);
@@ -110,6 +119,7 @@ public class WebSocketManager extends WebManager{
     //Constructor
     WebSocketManager(Builder builder) {
         this.mContext = builder.mContext;
+        this.coinMenuName = builder.coinMenuName;
         this.serverURL = builder.serverURL;
         this.isNeedReconnect = builder.isNeedReconnect;
         this.client = builder.client;
@@ -149,7 +159,7 @@ public class WebSocketManager extends WebManager{
     // Public methods of managing connection.
     @Override
     public void startConnect() {
-        Log.i("Raych", "WebSocketManager: startConnect() is called.");
+        Log.i("Raych", "WebManager: startConnect() is called.");
         isManualClose = false;
         buildConnection();
     }
@@ -168,7 +178,7 @@ public class WebSocketManager extends WebManager{
 
     @Override
     public boolean sendMessage(String msg) {
-        Log.i("Raych", "WebSocketManager: sendMessage() is called. msg: " + msg);
+        Log.i("Raych", "WebManager: sendMessage() is called. msg: " + msg);
         return send(msg);
     }
 
@@ -321,6 +331,7 @@ public class WebSocketManager extends WebManager{
 
     public static final class Builder {
         private Context mContext;
+        private String coinMenuName;
         private String serverURL;
         private boolean isNeedReconnect = true;
         private Handler mainThreadHandler;
@@ -334,6 +345,10 @@ public class WebSocketManager extends WebManager{
             this.mContext = context;
             this.mainThreadHandler = mainThreadHandler;
             this.dataThreadHandler = dataThreadHandler;
+        }
+
+        public void setCoinMenuName(String coinMenuName) {
+            this.coinMenuName = coinMenuName;
         }
 
         public Builder url(String serverURL) {
@@ -364,5 +379,6 @@ public class WebSocketManager extends WebManager{
         public WebSocketManager build() {
             return new WebSocketManager(this);
         }
+
     }
 }

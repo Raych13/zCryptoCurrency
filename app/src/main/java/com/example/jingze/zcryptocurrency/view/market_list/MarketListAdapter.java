@@ -1,7 +1,9 @@
 package com.example.jingze.zcryptocurrency.view.market_list;
 
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,21 +19,22 @@ import java.util.List;
 public class MarketListAdapter extends InfiniteAdapter<Coin>{
 
     private final MarketListFragment marketListFragment; //Leave for Starting new Activity
-    private static int priceGreen;
-    private static int priceGrey;
-    private static int priceRed;
+    private static Drawable priceGreen;
+    private static Drawable priceGrey;
+    private static Drawable priceRed;
     private static Drawable goesUp;
     private static Drawable goesDown;
     private static Drawable goesFlat;
     private static final int ITEMS_PER_PAGE = 10;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public MarketListAdapter(@NonNull MarketListFragment marketListFragment, @NonNull List data, @NonNull LoadMoreListener loadMoreListener) {
-        super(marketListFragment.getContext(), data, loadMoreListener, data.size() > ITEMS_PER_PAGE);
+        super(marketListFragment.getContext(), data, loadMoreListener, false);
         this.marketListFragment = marketListFragment;
         if (goesUp == null) {
-            priceGreen = getContext().getResources().getColor(R.color.price_green);
-            priceGrey = getContext().getResources().getColor(R.color.price_grey);
-            priceRed = getContext().getResources().getColor(R.color.price_red);
+            priceGreen = getContext().getResources().getDrawable(R.drawable.item_roundframe_green, null);
+            priceGrey = getContext().getResources().getDrawable(R.drawable.item_roundframe_grey, null);
+            priceRed = getContext().getResources().getDrawable(R.drawable.item_roundframe_red, null);
             goesUp = getContext().getResources().getDrawable(R.drawable.ic_trending_up_white_24dp);
             goesDown = getContext().getResources().getDrawable(R.drawable.ic_trending_down_white_24dp);
             goesFlat = getContext().getResources().getDrawable(R.drawable.ic_trending_flat_white_24dp);
@@ -44,30 +47,31 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         return new MarketListViewHolder(view);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onBindItemViewHolder(BaseViewHolder holder, int position) {
         //This part is to setText for each item
         MarketListViewHolder marketListViewHolder = (MarketListViewHolder) holder;
         final Coin coin = getData().get(position);
 
-        String title = coin.getCoinType() + " - "+ coin.getCurrencyType();
+//        String title = "○  " + coin.getCoinType() + " - "+ coin.getCurrencyType();
         String price = CoinUtils.priceWithCurrencySymbol(coin.getPrice(), coin.getCurrencyType());
         String changeRate = CoinUtils.convertToPercentage(coin.getDailyChangeRate());
 
-        marketListViewHolder.item_title_txv.setText(title);
+        marketListViewHolder.item_title_txv.setText(coin.getTitle());
         marketListViewHolder.item_price_txv.setText(price);
 
         if (coin.getDailyChangeRate() != null) {
             if (coin.getDailyChangeRate() > 0.00) {
-                marketListViewHolder.item_change_bg.setBackgroundColor(priceGreen);
+                marketListViewHolder.item_change_bg.setBackground(priceGreen);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesUp);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             } else if (coin.getDailyChangeRate() < 0.00) {
-                marketListViewHolder.item_change_bg.setBackgroundColor(priceRed);
+                marketListViewHolder.item_change_bg.setBackground(priceRed);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesDown);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             } else {
-                marketListViewHolder.item_change_bg.setBackgroundColor(priceGrey);
+                marketListViewHolder.item_change_bg.setBackground(priceGrey);
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesFlat);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             }

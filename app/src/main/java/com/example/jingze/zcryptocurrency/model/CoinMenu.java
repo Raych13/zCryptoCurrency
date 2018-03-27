@@ -110,15 +110,21 @@ public class CoinMenu implements Parcelable{
         }
     }
 
-    public void updateCoin(int chanId, Coin newCoin) {
+    public void updateCoin(int chanId, Coin newCoinData) {
         Log.i("Raych", "chanId: " + chanId + " is updated.");
         Coin coinToBeUpdate = directory.getCoin(chanId);
-        coinToBeUpdate.setPriceAndRate(newCoin.getPrice(), newCoin.getDailyChangeRate());
-        if (onChangeListener != null) {
-            Integer position = coinToBeUpdate.getPositionInMenu();
-            if (position != null) {
-                onChangeListener.onCoinChanged(position);
+        if (coinToBeUpdate != null) {
+            coinToBeUpdate.setPriceAndRate(newCoinData.getPrice(), newCoinData.getDailyChangeRate());
+            if (onChangeListener != null) {
+                Integer position = coinToBeUpdate.getPositionInMenu();
+                if (position != null) {
+                    onChangeListener.onCoinChanged(position);
+                }
             }
+        } else {
+            Log.e("Raych", "CoinMenu.updateCoin(), Coin: "
+                    + newCoinData.getCoinType()
+                    + "-" + newCoinData.getCurrencyType() + " is Not Found.");
         }
     }
 

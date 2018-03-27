@@ -1,8 +1,10 @@
 package com.example.jingze.zcryptocurrency.view.market_list;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +18,8 @@ import com.example.jingze.zcryptocurrency.R;
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.net.BitfinexManager;
+import com.example.jingze.zcryptocurrency.net.BourseActivityManager;
+import com.example.jingze.zcryptocurrency.net.HuobiManager;
 import com.example.jingze.zcryptocurrency.view.base.InfiniteAdapter;
 import com.example.jingze.zcryptocurrency.view.base.SpaceItemDecoration;
 
@@ -32,6 +36,7 @@ public class MarketListFragment extends Fragment{
 
     private Looper dataThreadLooper;
     private MarketListAdapter adapter;
+    private BourseActivityManager bourseActivityManager;
 
     public static MarketListFragment getInstance(CoinMenu coinMenu) {
         Bundle bundle = new Bundle();
@@ -51,16 +56,18 @@ public class MarketListFragment extends Fragment{
         View view = inflater.inflate(R.layout.fragment_swipe_recycler_view, container, false);
         ButterKnife.bind(this, view);
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
-        recyclerView.addItemDecoration(new SpaceItemDecoration(
-                getResources().getDimensionPixelSize(R.dimen.spacing_medium)));
+        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.spacing_small),
+                getResources().getDimensionPixelSize(R.dimen.spacing_small)));
         return view;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         swipeRefreshLayout.setEnabled(false);
         CoinMenu coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
         ArrayList<Coin> subMenu = coinMenu.getData();
+        startupBourseActivityManager(coinMenu);
 //        swipeRefreshLayout.setOnRefreshListener(
 //                new SwipeRefreshLayout.OnRefreshListener() {
 //            @Override
@@ -68,22 +75,15 @@ public class MarketListFragment extends Fragment{
 //
 //            }
 //        });
-
         adapter = new MarketListAdapter(this, subMenu, new InfiniteAdapter.LoadMoreListener() {
             @Override
             public void onLoadMore() {
             }
         });
-        //Add New task
-//        DataManager dataManager = new DataManager(getContext(), dataThreadLooper, adapter, coinMenu);
-//        dataManager.connectToWeb();
-        BitfinexManager bitfinexManager = new BitfinexManager(getContext(), dataThreadLooper, coinMenu);
-        bitfinexManager.buildWebSocket();
         coinMenu.setOnChangeListener(new CoinMenu.OnChangeListener() {
             @Override
             public void onCoinChanged(final int position) {
-                Log.i("RaychTest", "onCoinChanged() is reCalled");
-
+//                Log.i("RaychTest", "onCoinChanged() is reCalled");
                 recyclerView.post(new Runnable() {
                     @Override
                     public void run() {
@@ -100,8 +100,39 @@ public class MarketListFragment extends Fragment{
         recyclerView.setAdapter(adapter);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i("RaychTest", "onStop() is called.");
+        bourseActivityManager.stop();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Log.i("RaychTest", "onDetach() is called.");
+    }
+
     public void setDataThreadLooper(Looper dataThreadLooper) {
         this.dataThreadLooper = dataThreadLooper;
     }
 
+    private void startupBourseActivityManager(CoinMenu coinMenu) {
+        switch (coinMenu.getName()) {
+            case "Bitfinex": {
+                bourseActivityManager = new BitfinexManager(getContext(), dataThreadLooper, coinMenu);
+                bourseActivityManager.startConnection();
+                break;
+            }
+            case "Huobi": {
+                bourseActivityManager = new HuobiManager(getContext(), dataThreadLooper, coinMenu);
+                bourseActivityManager.startConnection();
+            }
+            default: {
+                Log.e("Raych",
+                        "MarketListFragment.startupBourseActivityManager() failed to create BourseActivityManager");
+            }
+        }
+
+    }
 }

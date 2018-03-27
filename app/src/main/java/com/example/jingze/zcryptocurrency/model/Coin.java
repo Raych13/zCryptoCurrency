@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 
 
 public class Coin implements Parcelable{
-
+    private String title;
     @Expose
     @SerializedName(value = "coinType", alternate = {"coin"})
     private String coinType;
@@ -21,6 +21,10 @@ public class Coin implements Parcelable{
     private Double dailyChangeRate;
     private Double dailyChange;
     private OnChangedListener onChangedListener;
+
+    public String getTitle() {
+        return title;
+    }
 
     //Interface
     public interface OnChangedListener{
@@ -150,12 +154,14 @@ public class Coin implements Parcelable{
     };
 
     public static class Builder{
+        private String title;
         private String coinType;
         private String currencyType;
         private Double price;
         private Double dailyChange;
 
         public Builder(String coinType, String currencyType) {
+            this.title =  "○  " + coinType + " - " + currencyType;
             this.coinType = coinType.toUpperCase();
             this.currencyType = currencyType.toUpperCase();
         }

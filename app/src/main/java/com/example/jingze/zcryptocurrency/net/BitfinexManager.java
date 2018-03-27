@@ -123,11 +123,10 @@ public class BitfinexManager extends BourseActivityManager {
 
     public BitfinexManager(Context context, Looper dataThreadLooper, CoinMenu coinMenu) {
         super(context, dataThreadLooper, coinMenu);
-        setDataThreadHandler();
     }
 
     @Override
-    public void buildWebSocket() {
+    public void startConnection() {
         dataThreadHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -141,14 +140,6 @@ public class BitfinexManager extends BourseActivityManager {
                         .isNeedReconnect(true)
                         .build();
                 webManager.startConnect();
-
-                //Run 30000ms for testing
-                dataThreadHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        webManager.stopConnect();
-                    }
-                }, 30000);
             }
         });
 
@@ -196,58 +187,58 @@ public class BitfinexManager extends BourseActivityManager {
 
     @Override
     public void stop() {
-
-
+        Log.i("RaychTest", "stop() is called.");
+//        unsubscribeAllCoins();
+        webManager.stopConnect();
     }
 
     @Override
-    void setDataThreadHandler() {
-        this.dataThreadHandler = new Handler(dataThreadLooper, new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                Event newMsg = parseData((String) message.obj);
-                switch (newMsg.event) {
-                    case EVENT_TYPE.INFO: {
-                        Log.i("Raych", "Get a Bitfinex event(Info): ");
-                        if (isFirstStart) {
-                            subscribeAllCoins();
-                            isFirstStart = false;
-                        }
-                        break;
+    boolean handlerLogic(Message message) {
+        if (message.what == WebSocketManager.MESSAGE_TYPE_TEXT) {
+            Event newMsg = parseData((String) message.obj);
+            switch (newMsg.event) {
+                case EVENT_TYPE.INFO: {
+                    Log.i("Raych", "Get a Bitfinex event(Info): ");
+                    if (isFirstStart) {
+                        subscribeAllCoins();
+                        isFirstStart = false;
                     }
-                    case EVENT_TYPE.SUBSCRIBED: {
-                        Log.i("Raych", "Get a Bitfinex event(Subscribed): ");
-                        buildConnectionWithCoin(newMsg);
-                        break;
-                    }
-                    case EVENT_TYPE.UNSUBSCRIBED: {
-                        Log.i("Raych", "Get a Bitfinex event(Subscribed): ");
-                        coinMenu.directory.remove(newMsg.chanId);
-                        break;
-                    }
-                    case EVENT_TYPE.ERROR: {
-                        Log.i("Raych", "Get a Bitfinex event(Error): ");
-                        break;
-                    }
-                    case EVENT_TYPE.UPDATE: {
-                        Log.i("Raych", "Get a Bitfinex event(Update): ");
-                        if (newMsg.coin != null) {
-                            coinMenu.updateCoin(newMsg.chanId, newMsg.coin);
-                        }
-                        break;
-                    }
-                    case EVENT_TYPE.HEARTBEATTING: {
-                        Log.i("Raych", "Get a Bitfinex event(HeartBeating): ");
-                        coinMenu.heartbeatting(newMsg.chanId);
-                        break;
-                    }
-                    default: {
-                        Log.i("Raych", "Get a Bitfinex event(Unknown): ");
-                    }
+                    break;
                 }
-                return false;
+                case EVENT_TYPE.SUBSCRIBED: {
+                    Log.i("Raych", "Get a Bitfinex event(Subscribed): ");
+                    buildConnectionWithCoin(newMsg);
+                    break;
+                }
+                case EVENT_TYPE.UNSUBSCRIBED: {
+                    Log.i("Raych", "Get a Bitfinex event(Subscribed): ");
+                    coinMenu.directory.remove(newMsg.chanId);
+                    break;
+                }
+                case EVENT_TYPE.ERROR: {
+                    Log.i("Raych", "Get a Bitfinex event(Error): ");
+                    break;
+                }
+                case EVENT_TYPE.UPDATE: {
+                    Log.i("Raych", "Get a Bitfinex event(Update): ");
+                    if (newMsg.coin != null) {
+                        coinMenu.updateCoin(newMsg.chanId, newMsg.coin);
+                    }
+                    break;
+                }
+                case EVENT_TYPE.HEARTBEATTING: {
+                    Log.i("Raych", "Get a Bitfinex event(HeartBeating): ");
+//                        coinMenu.heartbeatting(newMsg.chanId);
+                    break;
+                }
+                default: {
+                    Log.i("Raych", "Get a Bitfinex event(Unknown): ");
+                }
             }
-        });
+        } else if (message.what == WebSocketManager.MESSAGE_TYPE_BYTES) {
+
+        }
+        return false;
     }    
 
     //Private Methods
@@ -298,6 +289,12 @@ public class BitfinexManager extends BourseActivityManager {
     private void subscribeAllCoins() {
         for (int i = 0; i < coinMenu.size(); i++) {
             subscribe(CHANNEL.TICKER, coinMenu.getCoin(i));
+        }
+    }
+
+    private void unsubscribeAllCoins() {
+        for (int i = 0; i < coinMenu.size(); i++) {
+            unsubscribe(CHANNEL.TICKER, coinMenu.getCoin(i));
         }
     }
 
