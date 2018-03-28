@@ -17,9 +17,7 @@ public abstract class WebManager {
 
     abstract void setCurrentStatus(int currentStatus);
 
-    abstract boolean sendMessage(String msg);
-
-    abstract boolean sendMessage(ByteString byteString);
+    abstract boolean send(Object msg);
 
     //The codes of status.
     public static class Status {

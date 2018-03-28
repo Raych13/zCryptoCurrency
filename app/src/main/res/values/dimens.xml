@@ -10,7 +10,7 @@
 
     <dimen name="icon_micro">18dp</dimen>
     <dimen name="icon_small">24dp</dimen><!--Notification-->
-    <dimen name="icon_medium">32dp</dimen>
+    <dimen name="icon_medium">36dp</dimen>
     <dimen name="icon_large">48dp</dimen><!--StartUp-->
     <dimen name="icon_xlarge">60dp</dimen>
     <dimen name="icon_jumbo">72dp</dimen>
@@ -38,6 +38,12 @@
     <dimen name="nav_header_login_btn_margin_left">-8dp</dimen>
     <dimen name="nav_header_user_picture_size">48dp</dimen>
 
-    <dimen name="price_txv_size">100dp</dimen>
-    <dimen name="change_txv_size">96dp</dimen>
+    <dimen name="price_txv_size">108dp</dimen>
+    <dimen name="item_price_and_change_text_size">19sp</dimen>
+    <dimen name="item_change_txv_width">98dp</dimen>
+    <dimen name="item_change_txv_height">36dp</dimen>
+    <dimen name="list_item_spacing">10dp</dimen>
+    <dimen name="list_item_height">54dp</dimen>
+    <dimen name="item_change_txv_corner_radius">16dp</dimen>
+
 </resources>

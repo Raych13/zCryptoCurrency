@@ -3,6 +3,7 @@ package com.example.jingze.zcryptocurrency.view.base;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,10 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
 
     private final Context context;
     private final LoadMoreListener loadMoreListener;
+    private int dataSize;
+    private static final int ITEMS_PER_PAGE = 10;
+    private int page = 1;
+
 
     public interface LoadMoreListener {
         void onLoadMore();
@@ -28,12 +33,12 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
 
     public InfiniteAdapter(@NonNull Context context,
                            @NonNull List<T> data,
-                           @NonNull LoadMoreListener loadMoreListener,
-                           boolean hasMoreData) {
+                           @NonNull LoadMoreListener loadMoreListener) {
         this.context = context;
         this.data = data;
+        this.dataSize = data.size();
         this.loadMoreListener = loadMoreListener;
-        this.hasMoreData = hasMoreData;
+        this.hasMoreData = dataSize > ITEMS_PER_PAGE;
     }
 
     @Override
@@ -61,27 +66,27 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
 
     @Override
     public int getItemCount() {
-        return hasMoreData ? (data.size() + 1) : data.size();
+        return hasMoreData ? (ITEMS_PER_PAGE * this.page + 1) : data.size();
     }
 
     @Override
     public int getItemViewType(int position) {
         if (hasMoreData) {
-            return position == data.size() ? VIEWTYPE_LOADING : VIEWTYPE_ITEM;
+            return position >= (ITEMS_PER_PAGE * page) ? VIEWTYPE_LOADING : VIEWTYPE_ITEM;
         } else {
             return VIEWTYPE_ITEM;
         }
     }
 
-    public void append(@NonNull List<T> moredata) {
-        data.addAll(moredata);
-        notifyDataSetChanged();
-    }
+//    public void append(@NonNull List<T> moredata) {
+//        data.addAll(moredata);
+//        notifyDataSetChanged();
+//    }
 
-    public void prepend(@NonNull List<T> moredata) {
-        data.addAll(0, moredata);
-        notifyDataSetChanged();
-    }
+//    public void prepend(@NonNull List<T> moredata) {
+//        data.addAll(0, moredata);
+//        notifyDataSetChanged();
+//    }
 
     public void setData(@NonNull List<T> newData) {
         data.clear();
@@ -93,9 +98,27 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
         return data;
     }
 
-    public void setHasMoreData(boolean hasMoreData) {
-        this.hasMoreData = hasMoreData;
+    public void addOnePage() {
+        page++;
+        hasMoreData = (dataSize > page * ITEMS_PER_PAGE);
     }
+
+    public void resetPage() {
+        page = 1;
+        hasMoreData = (data.size() > ITEMS_PER_PAGE);
+    }
+
+//    public boolean isScrolling() {
+//        return isScrolling;
+//    }
+//
+//    public void setIsScrolling(boolean scrolling) {
+//        isScrolling = scrolling;
+//    }
+//
+//    public void setHasMoreData(boolean hasMoreData) {
+//        this.hasMoreData = hasMoreData;
+//    }
 
     protected Context getContext() {
         return context;

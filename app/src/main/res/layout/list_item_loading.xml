@@ -10,13 +10,4 @@
         android:layout_gravity="center"
         android:background="@xml/progress" />
 
-    <ProgressBar
-        android:layout_width="@dimen/loading_progress_bar_size"
-        android:layout_height="@dimen/loading_progress_bar_size"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:max="100"
-        android:progress="0"
-        android:layout_gravity="center"
-        android:background="@xml/progress" />
-
 </FrameLayout>

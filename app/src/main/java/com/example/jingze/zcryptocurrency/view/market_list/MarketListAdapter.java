@@ -25,11 +25,10 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
     private static Drawable goesUp;
     private static Drawable goesDown;
     private static Drawable goesFlat;
-    private static final int ITEMS_PER_PAGE = 10;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public MarketListAdapter(@NonNull MarketListFragment marketListFragment, @NonNull List data, @NonNull LoadMoreListener loadMoreListener) {
-        super(marketListFragment.getContext(), data, loadMoreListener, false);
+        super(marketListFragment.getContext(), data, loadMoreListener);
         this.marketListFragment = marketListFragment;
         if (goesUp == null) {
             priceGreen = getContext().getResources().getDrawable(R.drawable.item_roundframe_green, null);
@@ -47,7 +46,6 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         return new MarketListViewHolder(view);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onBindItemViewHolder(BaseViewHolder holder, int position) {
         //This part is to setText for each item
@@ -63,19 +61,30 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
 
         if (coin.getDailyChangeRate() != null) {
             if (coin.getDailyChangeRate() > 0.00) {
-                marketListViewHolder.item_change_bg.setBackground(priceGreen);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    marketListViewHolder.item_change_bg.setBackground(priceGreen);
+                } else {
+                    marketListViewHolder.item_change_bg.setBackgroundColor(getContext().getResources().getColor(R.color.price_green));
+                }
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesUp);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             } else if (coin.getDailyChangeRate() < 0.00) {
-                marketListViewHolder.item_change_bg.setBackground(priceRed);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    marketListViewHolder.item_change_bg.setBackground(priceRed);
+                } else {
+                    marketListViewHolder.item_change_bg.setBackgroundColor(getContext().getResources().getColor(R.color.price_red));
+                }
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesDown);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             } else {
-                marketListViewHolder.item_change_bg.setBackground(priceGrey);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    marketListViewHolder.item_change_bg.setBackground(priceGrey);
+                } else {
+                    marketListViewHolder.item_change_bg.setBackgroundColor(getContext().getResources().getColor(R.color.price_grey));
+                }
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(goesFlat);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             }
         }
     }
-
 }

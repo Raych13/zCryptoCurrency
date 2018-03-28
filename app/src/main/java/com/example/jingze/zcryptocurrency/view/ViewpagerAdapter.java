@@ -51,7 +51,7 @@ public class ViewpagerAdapter extends FragmentPagerAdapter{
         tabLayout.setSelectedTabIndicatorColor(
                 tabLayout.getContext().getResources().getColor(R.color.golden));
 //        tabLayout.getTabAt(0).setIcon(R.drawable.ic_favorite_white_24dp);
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_bitfinexlogo);
-        tabLayout.getTabAt(1).setIcon(R.mipmap.ic_huobilogo);
+//        tabLayout.getTabAt(0).setIcon(R.drawable.ic_bitfinexlogo);
+        tabLayout.getTabAt(0).setIcon(R.mipmap.ic_huobilogo);
     }
 }

@@ -2,11 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/list_item_height"
     xmlns:att="http://schemas.android.com/apk/res-auto"
     android:paddingLeft="@dimen/spacing_medium"
     android:paddingRight="@dimen/spacing_small"
-    android:paddingVertical="@dimen/spacing_medium"
     android:orientation="horizontal"
     android:background="@drawable/item_listframe"
     android:gravity="center_vertical|center">
@@ -16,6 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:gravity="center_vertical|left"
         android:textSize="@dimen/textSize_large"
         android:textColor="@color/item_text_color"
         tools:text="BTC - USD"/>
@@ -26,37 +26,40 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/spacing_medium"
         android:gravity="center_vertical|right"
-        android:textSize="@dimen/textSize_medium"
+        android:textSize="@dimen/item_price_and_change_text_size"
         android:maxLines="1"
         android:textColor="@color/item_text_color"
         tools:text="$10000.00"/>
 
     <LinearLayout
         android:id="@+id/marketList_item_change_bg"
-        android:layout_width="@dimen/change_txv_size"
-        android:layout_height="@dimen/icon_medium"
+        android:layout_width="@dimen/item_change_txv_width"
+        android:layout_height="@dimen/item_change_txv_height"
         android:paddingHorizontal="@dimen/spacing_micro"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:hapticFeedbackEnabled="true"
         android:background="@drawable/item_roundframe_grey">
 
         <ImageView
             android:id="@+id/marketList_item_changeSymbol_igv"
             android:layout_width="@dimen/icon_small"
             android:layout_height="@dimen/icon_small"
-            android:layout_marginTop="1dp"/>
+
+            android:layout_marginRight="1dp"
+            tools:background="@drawable/ic_trending_up_white_24dp"/>
 
         <TextView
             android:id="@+id/marketList_item_changeRate_txv"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical|right"
-            android:textSize="@dimen/textSize_medium"
+            android:textSize="@dimen/item_price_and_change_text_size"
             android:maxLines="1"
             android:textColor="@color/item_text_color"
             android:text="N/A %"
-            tools:text="N/A %"/>
+            tools:text="13.89%"/>
 
     </LinearLayout>
 

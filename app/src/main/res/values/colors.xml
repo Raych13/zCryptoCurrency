@@ -18,4 +18,5 @@
     <color name="price_red">#AACC3333</color>
     <color name="price_grey">#aaa0a0a0</color>
     <color name="item_text_color">#FFFFFFFF</color>
+    <color name="list_item_bg">#444444</color>
 </resources>

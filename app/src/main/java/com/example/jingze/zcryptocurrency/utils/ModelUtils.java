@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.net.BitfinexManager;
+import com.example.jingze.zcryptocurrency.net.HuobiManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -16,7 +17,7 @@ import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 
 public class ModelUtils {
-
+    private static String PREF_NAME = "models";
     private static Gson gson = new Gson();
     public static final Gson GSON_EXPOSS = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
     public static final Gson GSON_BITFINEX_EVENT = new GsonBuilder().registerTypeAdapter(BitfinexManager.Event.class, new TypeAdapter<BitfinexManager.Event>() {
@@ -52,7 +53,25 @@ public class ModelUtils {
         }
 
     }).create();
-    private static String PREF_NAME = "models";
+    public static final Gson GSON_HUOBI_EVENT = new GsonBuilder().registerTypeAdapter(HuobiManager.Event.class, new TypeAdapter<HuobiManager.Event>() {
+
+        @Override
+        public void write(JsonWriter out, HuobiManager.Event value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+                return;
+            }
+            out.beginObject();
+            out.name("req").value(value.req);
+            out.name("id").value(value.id);
+            out.endObject();
+        }
+
+        @Override
+        public HuobiManager.Event read(JsonReader in) throws IOException {
+            return null;
+        }
+    }).create();
 
     public static void save(Context context, String key, Object object) {
         SharedPreferences sp = context.getApplicationContext().getSharedPreferences(

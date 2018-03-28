@@ -2,7 +2,9 @@ package com.example.jingze.zcryptocurrency.view.market_list;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
@@ -33,10 +35,29 @@ public class MarketListFragment extends Fragment{
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
     public final static String BUNDLE_KEY_STRING = "total_data";
-
+    public static final int VIEW_UPDATE = 100;
+    private CoinMenu coinMenu;
     private Looper dataThreadLooper;
+    private Handler mainThreadHandler;
+    private LinearLayoutManager layoutManager;
     private MarketListAdapter adapter;
     private BourseActivityManager bourseActivityManager;
+
+    private Runnable loadMoreRunnable = new Runnable() {
+        @Override
+        public void run() {
+            adapter.addOnePage();
+            adapter.notifyDataSetChanged();
+        }
+    };
+
+    private InfiniteAdapter.LoadMoreListener onLoadMore = new InfiniteAdapter.LoadMoreListener(){
+        @Override
+        public void onLoadMore() {
+            mainThreadHandler.removeCallbacks(loadMoreRunnable);
+            mainThreadHandler.postDelayed(loadMoreRunnable, 1300);
+        }
+    };
 
     public static MarketListFragment getInstance(CoinMenu coinMenu) {
         Bundle bundle = new Bundle();
@@ -55,8 +76,10 @@ public class MarketListFragment extends Fragment{
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_swipe_recycler_view, container, false);
         ButterKnife.bind(this, view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
-        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.spacing_small),
+
+        layoutManager = new LinearLayoutManager(container.getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.spacing_medium),
                 getResources().getDimensionPixelSize(R.dimen.spacing_small)));
         return view;
     }
@@ -64,9 +87,14 @@ public class MarketListFragment extends Fragment{
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        mainThreadHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message message) {
+                return mainThreadHandlerLogic(message);
+            }
+        });
         swipeRefreshLayout.setEnabled(false);
-        CoinMenu coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
-        ArrayList<Coin> subMenu = coinMenu.getData();
+        coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
         startupBourseActivityManager(coinMenu);
 //        swipeRefreshLayout.setOnRefreshListener(
 //                new SwipeRefreshLayout.OnRefreshListener() {
@@ -75,28 +103,9 @@ public class MarketListFragment extends Fragment{
 //
 //            }
 //        });
-        adapter = new MarketListAdapter(this, subMenu, new InfiniteAdapter.LoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-            }
-        });
-        coinMenu.setOnChangeListener(new CoinMenu.OnChangeListener() {
-            @Override
-            public void onCoinChanged(final int position) {
-//                Log.i("RaychTest", "onCoinChanged() is reCalled");
-                recyclerView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        adapter.notifyItemChanged(position);
-                    }
-                });
-            }
-
-            @Override
-            public void onDataOrderChanged() {
-
-            }
-        });
+        ArrayList<Coin> coinList = coinMenu.getData();
+        adapter = new MarketListAdapter(this, coinList, onLoadMore);
+        setCoinMenuOnChangeListener();
         recyclerView.setAdapter(adapter);
     }
 
@@ -127,6 +136,7 @@ public class MarketListFragment extends Fragment{
             case "Huobi": {
                 bourseActivityManager = new HuobiManager(getContext(), dataThreadLooper, coinMenu);
                 bourseActivityManager.startConnection();
+                break;
             }
             default: {
                 Log.e("Raych",
@@ -134,5 +144,45 @@ public class MarketListFragment extends Fragment{
             }
         }
 
+    }
+
+    private void setCoinMenuOnChangeListener() {
+        coinMenu.setOnChangeListener(new CoinMenu.OnChangeListener() {
+            @Override
+            public void onCoinChanged(final int position) {
+//                Log.i("RaychTest", "onCoinChanged() is reCalled");
+                mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int firstPosition = layoutManager.findFirstVisibleItemPosition();
+                        int lastPosition = layoutManager.findLastVisibleItemPosition();
+                        //Only update the item that is visible, and only when the screen is stop.
+                        if (position >= firstPosition && position <= lastPosition) {
+                            adapter.notifyItemChanged(position);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onDataOrderChanged() {
+
+            }
+        });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void setOnScroll(RecyclerView recyclerView) {
+        recyclerView.setOnScrollChangeListener(new RecyclerView.OnScrollChangeListener() {
+
+            @Override
+            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
+
+            }
+        });
+    }
+
+    private boolean mainThreadHandlerLogic(Message message) {
+        return false;
     }
 }

@@ -177,14 +177,20 @@ public class WebSocketManager extends WebManager{
     }
 
     @Override
-    public boolean sendMessage(String msg) {
-        Log.i("Raych", "WebManager: sendMessage() is called. msg: " + msg);
-        return send(msg);
-    }
-
-    @Override
-    public boolean sendMessage(ByteString byteString) {
-        return send(byteString);
+    public boolean send(Object msg) {
+        boolean isSend = false;
+        if (mWebSocket != null && mCurrentStatus == Status.CONNECTED) {
+            if (msg instanceof String) {
+                isSend = mWebSocket.send((String) msg);
+            } else if (msg instanceof ByteString) {
+                isSend = mWebSocket.send((ByteString) msg);
+            }
+            //Reconnect when fail to send message
+            if (!isSend) {
+                attemptReconnect();
+            }
+        }
+        return isSend;
     }
 
     //Private methods below:
@@ -297,21 +303,6 @@ public class WebSocketManager extends WebManager{
         }
     }
 
-    private boolean send(Object msg) {
-        boolean isSend = false;
-        if (mWebSocket != null && mCurrentStatus == Status.CONNECTED) {
-            if (msg instanceof String) {
-                isSend = mWebSocket.send((String) msg);
-            } else if (msg instanceof ByteString) {
-                isSend = mWebSocket.send((ByteString) msg);
-            }
-            //Reconnect when fail to send message
-            if (!isSend) {
-                attemptReconnect();
-            }
-        }
-        return isSend;
-    }
 
     public interface WebSocketExtraListener{
         void onOpen(Response response);
