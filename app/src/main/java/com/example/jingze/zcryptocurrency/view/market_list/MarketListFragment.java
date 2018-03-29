@@ -35,12 +35,17 @@ public class MarketListFragment extends Fragment{
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
     public final static String BUNDLE_KEY_STRING = "total_data";
-    public static final int VIEW_UPDATE = 100;
+    public static final int ITEM_UPDATE = 100;
+
+    private static final int ONLOADMORE_DELAY = 1300;
+    private static final int DRAGGED_RESEND_DELAY = 1500;
+    private static final int FLYING_RESEND_DELAY = 800;
+    private int scrollStart = 0;
     private CoinMenu coinMenu;
     private Looper dataThreadLooper;
     private Handler mainThreadHandler;
-    private LinearLayoutManager layoutManager;
     private MarketListAdapter adapter;
+    private LinearLayoutManager layoutManager;
     private BourseActivityManager bourseActivityManager;
 
     private Runnable loadMoreRunnable = new Runnable() {
@@ -54,8 +59,9 @@ public class MarketListFragment extends Fragment{
     private InfiniteAdapter.LoadMoreListener onLoadMore = new InfiniteAdapter.LoadMoreListener(){
         @Override
         public void onLoadMore() {
+            swipeRefreshLayout.setEnabled(true);
             mainThreadHandler.removeCallbacks(loadMoreRunnable);
-            mainThreadHandler.postDelayed(loadMoreRunnable, 1300);
+            mainThreadHandler.postDelayed(loadMoreRunnable, ONLOADMORE_DELAY);
         }
     };
 
@@ -79,7 +85,7 @@ public class MarketListFragment extends Fragment{
 
         layoutManager = new LinearLayoutManager(container.getContext());
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.spacing_medium),
+        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.list_item_spacing),
                 getResources().getDimensionPixelSize(R.dimen.spacing_small)));
         return view;
     }
@@ -93,16 +99,11 @@ public class MarketListFragment extends Fragment{
                 return mainThreadHandlerLogic(message);
             }
         });
-        swipeRefreshLayout.setEnabled(false);
+        setOnScrollListener(recyclerView);
+        setupSwipeRefreshLayout();
         coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
-        startupBourseActivityManager(coinMenu);
-//        swipeRefreshLayout.setOnRefreshListener(
-//                new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//
-//            }
-//        });
+        setupBourseActivityManager(coinMenu);
+
         ArrayList<Coin> coinList = coinMenu.getData();
         adapter = new MarketListAdapter(this, coinList, onLoadMore);
         setCoinMenuOnChangeListener();
@@ -126,7 +127,26 @@ public class MarketListFragment extends Fragment{
         this.dataThreadLooper = dataThreadLooper;
     }
 
-    private void startupBourseActivityManager(CoinMenu coinMenu) {
+    private void setupSwipeRefreshLayout() {
+        swipeRefreshLayout.setEnabled(false);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        adapter.resetPage();
+                        adapter.notifyDataSetChanged();
+                        mainThreadHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                swipeRefreshLayout.setEnabled(false);
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                        }, 1300);
+                    }
+                });
+    }
+
+    private void setupBourseActivityManager(CoinMenu coinMenu) {
         switch (coinMenu.getName()) {
             case "Bitfinex": {
                 bourseActivityManager = new BitfinexManager(getContext(), dataThreadLooper, coinMenu);
@@ -151,17 +171,23 @@ public class MarketListFragment extends Fragment{
             @Override
             public void onCoinChanged(final int position) {
 //                Log.i("RaychTest", "onCoinChanged() is reCalled");
-                mainThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        int firstPosition = layoutManager.findFirstVisibleItemPosition();
-                        int lastPosition = layoutManager.findLastVisibleItemPosition();
-                        //Only update the item that is visible, and only when the screen is stop.
-                        if (position >= firstPosition && position <= lastPosition) {
-                            adapter.notifyItemChanged(position);
-                        }
-                    }
-                });
+                //@param what The value indicates what the message is about.
+                //@param arg1 The value indicates which position of the coin to be handled.
+                //@param arg2 The value indicates how many times has this message been posted previously..
+                Message msg = mainThreadHandler.obtainMessage(ITEM_UPDATE, position, 0);
+                mainThreadHandler.sendMessage(msg);
+//                mainThreadHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        int firstPosition = layoutManager.findFirstVisibleItemPosition();
+//                        int lastPosition = layoutManager.findLastVisibleItemPosition();
+//                        //Only update the item that is visible, and only when the screen is stop.
+//                        if (position <= lastPosition && position >= firstPosition) {
+//                            adapter.notifyItemChanged(position);
+//                        }
+//                    }
+//                });
             }
 
             @Override
@@ -171,18 +197,43 @@ public class MarketListFragment extends Fragment{
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void setOnScroll(RecyclerView recyclerView) {
-        recyclerView.setOnScrollChangeListener(new RecyclerView.OnScrollChangeListener() {
-
+    private void setOnScrollListener(RecyclerView recyclerView) {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
-
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                scrollStart = newState;
             }
         });
+
+//        recyclerView.setOnScrollChangeListener(new RecyclerView.OnScrollChangeListener() {
+//            @Override
+//            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
+//
+//            }
+//        });
     }
 
     private boolean mainThreadHandlerLogic(Message message) {
+        //Message that has been resend more than 2 times will not be handled.
+        if (message.what ==ITEM_UPDATE && message.arg2 < 3) {
+            final int position = message.arg1;
+            if (scrollStart == 0) {             //IDLE: Not scrolling action.
+                final int firstPosition = layoutManager.findFirstVisibleItemPosition() - 1;
+                final int lastPosition = layoutManager.findLastVisibleItemPosition() + 1;
+                if (position <= lastPosition && position >= firstPosition) {
+                    adapter.notifyItemChanged(position);
+                }
+            } else if (scrollStart == 1) {      //DRAGGING: is being dragged to scroll.
+                int resendTimes = ++message.arg2;
+                Message msg = mainThreadHandler.obtainMessage(ITEM_UPDATE, position, resendTimes);
+                mainThreadHandler.sendMessageDelayed(msg, DRAGGED_RESEND_DELAY * resendTimes);
+            } else if (scrollStart == 2) {      //FLYING: is scrolling automatically.
+                int resendTimes = ++message.arg2;
+                Message msg = mainThreadHandler.obtainMessage(ITEM_UPDATE, position, resendTimes);
+                mainThreadHandler.sendMessageDelayed(msg, FLYING_RESEND_DELAY * resendTimes);
+            }
+        }
         return false;
     }
 }

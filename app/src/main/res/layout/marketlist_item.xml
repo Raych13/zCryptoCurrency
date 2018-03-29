@@ -12,9 +12,8 @@
 
     <TextView
         android:id="@+id/marketList_item_title_txv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_width="146dp"
+        android:layout_height="@dimen/icon_medium"
         android:gravity="center_vertical|left"
         android:textSize="@dimen/textSize_large"
         android:textColor="@color/item_text_color"
@@ -23,7 +22,7 @@
     <TextView
         android:id="@+id/marketList_item_price_txv"
         android:layout_width="@dimen/price_txv_size"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/icon_medium"
         android:layout_marginRight="@dimen/spacing_medium"
         android:gravity="center_vertical|right"
         android:textSize="@dimen/item_price_and_change_text_size"
@@ -37,7 +36,7 @@
         android:layout_height="@dimen/item_change_txv_height"
         android:paddingHorizontal="@dimen/spacing_micro"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:gravity="center_vertical|right"
         android:hapticFeedbackEnabled="true"
         android:background="@drawable/item_roundframe_grey">
 
@@ -45,21 +44,19 @@
             android:id="@+id/marketList_item_changeSymbol_igv"
             android:layout_width="@dimen/icon_small"
             android:layout_height="@dimen/icon_small"
-
-            android:layout_marginRight="1dp"
+            android:visibility="gone"
             tools:background="@drawable/ic_trending_up_white_24dp"/>
 
         <TextView
             android:id="@+id/marketList_item_changeRate_txv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="@dimen/icon_medium"
             android:gravity="center_vertical|right"
             android:textSize="@dimen/item_price_and_change_text_size"
             android:maxLines="1"
             android:textColor="@color/item_text_color"
-            android:text="N/A %"
-            tools:text="13.89%"/>
+            android:text="N / A    "
+            tools:text="N / A      "/>
 
     </LinearLayout>
 

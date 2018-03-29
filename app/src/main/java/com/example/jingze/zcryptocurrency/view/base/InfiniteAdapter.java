@@ -24,7 +24,7 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
     private final LoadMoreListener loadMoreListener;
     private int dataSize;
     private static final int ITEMS_PER_PAGE = 10;
-    private int page = 1;
+    private int page = 0;
 
 
     public interface LoadMoreListener {

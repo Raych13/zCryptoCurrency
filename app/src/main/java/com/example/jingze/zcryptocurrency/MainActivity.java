@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void setupUI(Bundle savedInstanceState) {
         setSupportActionBar(toolbar);
-        getSupportActionBar().setElevation(1);
+//        getSupportActionBar().setElevation(1);
         setupActionBar();
         setupViewpager(savedInstanceState);
     }

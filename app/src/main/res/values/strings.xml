@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">zCryptoCurrency</string>
+    <string name="app_name">zCoins</string>
 
     <string name="login">Log in</string>
     <string name="logout">Log out</string>

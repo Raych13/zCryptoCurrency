@@ -145,22 +145,7 @@ public class BitfinexManager extends BourseActivityManager {
 
     @Override
     public void subscribe(final String channel, final Coin coin) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Event subscribeEvent = (new Event.Builder())
-                        .setEvent(EVENT_TYPE.SUBSCRIBE)
-                        .setChannel(channel)
-                        .setSymbol(coinToSymbol(coin))
-                        .build();
-                String subscribeJson = ModelUtils
-                        .toStringSpecified(ModelUtils.GSON_BITFINEX_EVENT,
-                                subscribeEvent,
-                                new TypeToken<Event>(){});
-                webManager.send(subscribeJson);
-            }
-        };
-        dataThreadHandler.post(runnable);
+        subscribe(channel, coin, 0);
     }
 
     @Override
@@ -263,7 +248,7 @@ public class BitfinexManager extends BourseActivityManager {
                     ArrayList<Object> msgArray = (ArrayList<Object>) dataArray.get(1);
                     Coin newCoin = new Coin();
                     if (!(msgArray.get(0) instanceof ArrayList)) {
-                        newCoin.setDailyChangeRate((Double)msgArray.get(5));
+                        newCoin.setDailyChangeRate((Double)msgArray.get(5) * 100);
                         newCoin.setPrice((Double)msgArray.get(6));
                     }
                     newEvent.coin = newCoin;
@@ -284,9 +269,28 @@ public class BitfinexManager extends BourseActivityManager {
         }
     }
 
+    private void subscribe(final String channel, final Coin coin, int delay) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Event subscribeEvent = (new Event.Builder())
+                        .setEvent(EVENT_TYPE.SUBSCRIBE)
+                        .setChannel(channel)
+                        .setSymbol(coinToSymbol(coin))
+                        .build();
+                String subscribeJson = ModelUtils
+                        .toStringSpecified(ModelUtils.GSON_BITFINEX_EVENT,
+                                subscribeEvent,
+                                new TypeToken<Event>(){});
+                webManager.send(subscribeJson);
+            }
+        };
+        dataThreadHandler.postDelayed(runnable, delay);
+    }
+
     private void subscribeAllCoins() {
         for (int i = 0; i < coinMenu.size(); i++) {
-            subscribe(CHANNEL.TICKER, coinMenu.getCoin(i));
+            subscribe(CHANNEL.TICKER, coinMenu.getCoin(i), i * 130);
         }
     }
 
