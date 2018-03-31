@@ -5,12 +5,13 @@ import android.os.Message;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
+import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
 
 /**
  * Created by Jingze HUANG on Mar.27, 2018.
  */
 
-public class PoloniexManager extends BourseActivityManager{
+public class PoloniexManager extends BourseActivityManager {
     public static class Event{
     }
 
@@ -39,7 +40,7 @@ public class PoloniexManager extends BourseActivityManager{
     }
 
     @Override
-    boolean handlerLogic(Message message) {
+    protected boolean handlerLogic(Message message) {
         return false;
     }
 }

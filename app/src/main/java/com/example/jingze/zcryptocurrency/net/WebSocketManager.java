@@ -5,6 +5,7 @@ import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
+import com.example.jingze.zcryptocurrency.net.base.WebManager;
 import com.example.jingze.zcryptocurrency.utils.NetworkServiceUtils;
 import com.example.jingze.zcryptocurrency.utils.SnackBarUtils;
 
@@ -23,7 +24,7 @@ import okio.ByteString;
  * Created by Jingze HUANG on Mar.20, 2018.
  */
 
-public class WebSocketManager extends WebManager{
+public class WebSocketManager extends WebManager {
     public final static int MESSAGE_TYPE_TEXT = 100;
     public final static int MESSAGE_TYPE_BYTES = 101;
     private final static int RECONNECT_INTERVAL = 5 * 1000;    //Reconnection interval
@@ -167,7 +168,7 @@ public class WebSocketManager extends WebManager{
     }
 
     @Override
-    WebSocket getWebSocket() {
+    public WebSocket getWebSocket() {
         return mWebSocket;
     }
 

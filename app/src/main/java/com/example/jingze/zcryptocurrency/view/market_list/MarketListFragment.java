@@ -20,7 +20,7 @@ import com.example.jingze.zcryptocurrency.R;
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.net.BitfinexManager;
-import com.example.jingze.zcryptocurrency.net.BourseActivityManager;
+import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
 import com.example.jingze.zcryptocurrency.net.HuobiManager;
 import com.example.jingze.zcryptocurrency.net.handler.UIHandler;
 import com.example.jingze.zcryptocurrency.utils.RunningTimeUtils;
@@ -90,6 +90,10 @@ public class MarketListFragment extends Fragment{
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 //        Log.i("RaychTest", this.toString() + ":\t" + " onCreateView() The savedInstanceState is null? " + (savedInstanceState == null));
+        if (container == null) {
+            Log.e("Raych", "Position: " + this + ".\t contain is null.");
+            return view;
+        }
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_swipe_recycler_view, container, false);
             ButterKnife.bind(this, view);
@@ -112,10 +116,13 @@ public class MarketListFragment extends Fragment{
 //        Log.i("RaychTest", this.toString() + ":\t" + " onViewCreated() The savedInstanceState is null? " + (savedInstanceState == null));
         if (!hasStarted) {
             coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
-            ArrayList<Coin> coinList = coinMenu.getData();
-            adapter = new MarketListAdapter(this, coinList, onLoadMore);
-
-            recyclerView.setAdapter(adapter);
+            if (coinMenu != null) {
+                ArrayList<Coin> coinList = coinMenu.getData();
+                adapter = new MarketListAdapter(this, coinList, onLoadMore);
+                recyclerView.setAdapter(adapter);
+            } else {
+                Log.e("Raych", "Position: " + this + ".\tUnable to load coinList");
+            }
         }
         RunningTimeUtils.end("MainActivity start to Fragment onViewCreated() ends");
 //        Log.i("RaychTest", this.toString() + ":\t" + " onViewCreated()");

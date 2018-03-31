@@ -13,11 +13,6 @@ public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
         this.space_horizontal = space_horizontal;
     }
 
-    public SpaceItemDecoration() {
-        super();
-
-    }
-
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         outRect.left = space_horizontal;

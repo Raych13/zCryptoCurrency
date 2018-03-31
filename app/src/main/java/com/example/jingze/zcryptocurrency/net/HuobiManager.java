@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
+import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
 import com.example.jingze.zcryptocurrency.utils.GZipUtils;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
 import com.google.gson.annotations.SerializedName;
@@ -172,7 +173,7 @@ public class HuobiManager extends BourseActivityManager {
     }
 
     @Override
-    boolean handlerLogic(Message message) {
+    protected boolean handlerLogic(Message message) {
         if (message.what == WebSocketManager.MESSAGE_TYPE_TEXT) {
         } else if (message.what == WebSocketManager.MESSAGE_TYPE_BYTES) {
             Event newEvent = parseData(message);

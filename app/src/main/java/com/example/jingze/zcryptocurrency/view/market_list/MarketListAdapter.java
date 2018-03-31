@@ -16,7 +16,7 @@ import com.example.jingze.zcryptocurrency.view.base.InfiniteAdapter;
 import java.util.List;
 
 public class MarketListAdapter extends InfiniteAdapter<Coin>{
-    private final MarketListFragment marketListFragment; //Leave for Starting new Activity
+//    private final MarketListFragment marketListFragment; //Leave for Starting new Activity
     private static Drawable priceGreen;
     private static Drawable priceGrey;
     private static Drawable priceRed;
@@ -28,9 +28,9 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
     private static Integer priceRedColor;
     private final static String NOT_AVAILABLE = "N / A    ";
 
-    public MarketListAdapter(@NonNull MarketListFragment marketListFragment, @NonNull List data, @NonNull LoadMoreListener loadMoreListener) {
+    MarketListAdapter(@NonNull MarketListFragment marketListFragment, @NonNull List data, @NonNull LoadMoreListener loadMoreListener) {
         super(marketListFragment.getContext(), data, loadMoreListener);
-        this.marketListFragment = marketListFragment;
+//        this.marketListFragment = marketListFragment;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (priceGreen == null) {
                 priceGreen = getContext().getResources().getDrawable(R.drawable.item_roundframe_green, null);

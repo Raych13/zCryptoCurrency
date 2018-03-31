@@ -22,9 +22,9 @@ public class UIHandler extends Handler{
 
     public static final int VP_DRAGGED_RESEND_DELAY = 300;
 
-    public UIHandler() {
-        super(Looper.getMainLooper());
-    }
+//    public UIHandler() {
+//        super(Looper.getMainLooper());
+//    }
 
     public UIHandler(Callback callback) {
         super(Looper.getMainLooper(), callback);

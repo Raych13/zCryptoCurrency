@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
+import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -174,7 +175,7 @@ public class BitfinexManager extends BourseActivityManager {
     }
 
     @Override
-    boolean handlerLogic(Message message) {
+    protected boolean handlerLogic(Message message) {
         if (message.what == WebSocketManager.MESSAGE_TYPE_TEXT) {
             Event newMsg = parseData((String) message.obj);
             switch (newMsg.event) {
