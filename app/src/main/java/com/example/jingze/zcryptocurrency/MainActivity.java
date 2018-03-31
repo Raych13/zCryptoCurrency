@@ -1,6 +1,5 @@
 package com.example.jingze.zcryptocurrency;
 
-import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -9,7 +8,6 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -22,15 +20,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
+import com.example.jingze.zcryptocurrency.utils.RunningTimeUtils;
 import com.example.jingze.zcryptocurrency.utils.SnackBarUtils;
 import com.example.jingze.zcryptocurrency.view.ViewpagerAdapter;
+import com.example.jingze.zcryptocurrency.view.market_list.MarketListFragment;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,35 +42,65 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @BindView(R.id.main_viewpager) ViewPager viewPager;
     @BindView((R.id.main_viewpager_tab)) TabLayout viewPager_tab;
 
+    private final int VIEWPAGER_INITIAL_POSITION = 0;
     private ActionBarDrawerToggle drawerToggle;
     private ViewpagerAdapter viewpagerAdapter;
-    private Looper dataThreadLooper;
     private Handler dataThreadHandler;
     private ArrayList<CoinMenu> mainMenu = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        RunningTimeUtils.start();
+
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         Log.i("Taych", "Is: " + (savedInstanceState == null));
+
         HandlerThread dataThread = new HandlerThread("DataThread", Process.THREAD_PRIORITY_BACKGROUND);
         dataThread.start();
-        dataThreadLooper = dataThread.getLooper();
-        dataThreadHandler = new Handler(dataThreadLooper);
+
+        dataThreadHandler = new Handler(dataThread.getLooper());
         mainMenu = mockData();
+
+        setupUI(savedInstanceState);
+//        RunningTimeUtils.end("MainActivity onCreate()");
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initiateUtils();
+//        RunningTimeUtils.start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+    }
+
+    private void initiateUtils() {
+//        NetworkServiceUtils.setGetContext(new NetworkServiceUtils.GetContext() {
+//            @Override
+//            public Context getContext() {
+//                return getApplicationContext();
+//            }
+//        });
+        NetworkServiceUtils.setContext(getApplicationContext());
         SnackBarUtils.setFindView(new SnackBarUtils.FindView() {
             @Override
             public View findView() {
                 return getWindow().getDecorView();
             }
         });
-        setupUI(savedInstanceState);
     }
 
     private void setupUI(Bundle savedInstanceState) {
-        setSupportActionBar(toolbar);
-//        getSupportActionBar().setElevation(1);
         setupActionBar();
         setupViewpager(savedInstanceState);
     }
@@ -92,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //            getWindow().setNavigationBarColor(Color.TRANSPARENT);
 //            getWindow().setStatusBarColor(Color.TRANSPARENT);
 //        }
+        setSupportActionBar(toolbar);
 
         drawerToggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.open_drawer, R.string.close_drawer);
@@ -105,15 +134,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         viewpagerAdapter = new ViewpagerAdapter(getSupportFragmentManager(),
                 viewPager_tab, dataThreadHandler, mainMenu);
         viewPager.setAdapter(viewpagerAdapter);
+        viewPager.setCurrentItem(VIEWPAGER_INITIAL_POSITION);
+        MarketListFragment.viewPager = viewPager;
+//        MarketListFragment.currentPagePosition = VIEWPAGER_INITIAL_POSITION;
+//        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//            @Override
+//            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//                Log.i("RaychTest1", "onPageScrolled(): Position: " + position + ". PositionOffset: " + positionOffset + ".");
+//                MarketListFragment.currentPagePosition = position;
+//            }
+//
+//            @Override
+//            public void onPageSelected(int position) {
+//                Log.i("RaychTest2", "onPageSelected(): Position: " + position + ".");
+//            }
+//
+//            @Override
+//            public void onPageScrollStateChanged(int state) {
+//                Log.i("RaychTest3", "onPageScrollStateChanged(): State: " + state);
+//                MarketListFragment.viewPagerScrollState = state;
+//            }
+//        });
         viewPager_tab.setupWithViewPager(viewPager);
         viewpagerAdapter.setupTabLayout(mainMenu);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        viewpagerAdapter.getItem(0);
-    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -151,16 +196,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]}]";
 //        //Single List
 //        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]}]";
-//          //Load Date Test
-        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]}]";
+//          /update Data Test
+//        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]}]";
 //          //Double Lists
 //        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]}]";
 //        //Triple lists
 //        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]}]";
-//        //Huobi
+        // Five
+//        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]}]";
+        //        //Huobi
 //        String jsonListList = "[{\"name\":\"Huobi\",\"url\":\"wss://api.hadax.com/ws\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]}]";
         //Huobi one coin for Test
 //        String jsonListList = "[{\"name\":\"Huobi\",\"url\":\"wss://api.huobipro.com/ws\",\"data\":[{\"title\":\"○  LTC - BTC\",\"coinType\":\"BTC\",\"currencyType\":\"USDT\"}]}]";
+
+//        //A completed Bitfinex list
+ //        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  TRX - USD\",\"coinType\":\"TRX\",\"currencyType\":\"USD\"},{\"title\":\"○  SAN - USD\",\"coinType\":\"SAN\",\"currencyType\":\"USD\"},{\"title\":\"○  RCN - USD\",\"coinType\":\"RCN\",\"currencyType\":\"USD\"},{\"title\":\"○  EDO - USD\",\"coinType\":\"EDO\",\"currencyType\":\"USD\"},{\"title\":\"○  TNB - USD\",\"coinType\":\"TNB\",\"currencyType\":\"USD\"},{\"title\":\"○  ETP - USD\",\"coinType\":\"ETP\",\"currencyType\":\"USD\"},{\"title\":\"○  ZRX - USD\",\"coinType\":\"ZRX\",\"currencyType\":\"USD\"},{\"title\":\"○  SNT - USD\",\"coinType\":\"SNT\",\"currencyType\":\"USD\"},{\"title\":\"○  SPK - USD\",\"coinType\":\"SPK\",\"currencyType\":\"USD\"},{\"title\":\"○  REP - USD\",\"coinType\":\"REP\",\"currencyType\":\"USD\"},{\"title\":\"○  YYW - USD\",\"coinType\":\"YYW\",\"currencyType\":\"USD\"},{\"title\":\"○  FUN - USD\",\"coinType\":\"FUN\",\"currencyType\":\"USD\"},{\"title\":\"○  GNT - USD\",\"coinType\":\"GNT\",\"currencyType\":\"USD\"},{\"title\":\"○  AID - USD\",\"coinType\":\"AID\",\"currencyType\":\"USD\"},{\"title\":\"○  MNA - USD\",\"coinType\":\"MNA\",\"currencyType\":\"USD\"},{\"title\":\"○  RLC - USD\",\"coinType\":\"RLC\",\"currencyType\":\"USD\"},{\"title\":\"○  AVT - USD\",\"coinType\":\"AVT\",\"currencyType\":\"USD\"},{\"title\":\"○  SNG - USD\",\"coinType\":\"SNG\",\"currencyType\":\"USD\"}]}]";
+        String jsonListList = "[{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"},{\"title\":\"○  BCH - USD\",\"coinType\":\"BCH\",\"currencyType\":\"USD\"},{\"title\":\"○  NEO - USD\",\"coinType\":\"NEO\",\"currencyType\":\"USD\"},{\"title\":\"○  OMG - USD\",\"coinType\":\"OMG\",\"currencyType\":\"USD\"},{\"title\":\"○  XMR - USD\",\"coinType\":\"XMR\",\"currencyType\":\"USD\"},{\"title\":\"○  BTG - USD\",\"coinType\":\"BTG\",\"currencyType\":\"USD\"},{\"title\":\"○  ELF - USD\",\"coinType\":\"ELF\",\"currencyType\":\"USD\"},{\"title\":\"○  ZEC - USD\",\"coinType\":\"ZEC\",\"currencyType\":\"USD\"},{\"title\":\"○  BAT - USD\",\"coinType\":\"BAT\",\"currencyType\":\"USD\"},{\"title\":\"○  TRX - USD\",\"coinType\":\"TRX\",\"currencyType\":\"USD\"},{\"title\":\"○  SAN - USD\",\"coinType\":\"SAN\",\"currencyType\":\"USD\"},{\"title\":\"○  RCN - USD\",\"coinType\":\"RCN\",\"currencyType\":\"USD\"},{\"title\":\"○  EDO - USD\",\"coinType\":\"EDO\",\"currencyType\":\"USD\"},{\"title\":\"○  TNB - USD\",\"coinType\":\"TNB\",\"currencyType\":\"USD\"},{\"title\":\"○  ETP - USD\",\"coinType\":\"ETP\",\"currencyType\":\"USD\"},{\"title\":\"○  ZRX - USD\",\"coinType\":\"ZRX\",\"currencyType\":\"USD\"},{\"title\":\"○  SNT - USD\",\"coinType\":\"SNT\",\"currencyType\":\"USD\"},{\"title\":\"○  SPK - USD\",\"coinType\":\"SPK\",\"currencyType\":\"USD\"},{\"title\":\"○  REP - USD\",\"coinType\":\"REP\",\"currencyType\":\"USD\"},{\"title\":\"○  YYW - USD\",\"coinType\":\"YYW\",\"currencyType\":\"USD\"},{\"title\":\"○  FUN - USD\",\"coinType\":\"FUN\",\"currencyType\":\"USD\"},{\"title\":\"○  GNT - USD\",\"coinType\":\"GNT\",\"currencyType\":\"USD\"},{\"title\":\"○  AID - USD\",\"coinType\":\"AID\",\"currencyType\":\"USD\"},{\"title\":\"○  MNA - USD\",\"coinType\":\"MNA\",\"currencyType\":\"USD\"},{\"title\":\"○  RLC - USD\",\"coinType\":\"RLC\",\"currencyType\":\"USD\"},{\"title\":\"○  AVT - USD\",\"coinType\":\"AVT\",\"currencyType\":\"USD\"},{\"title\":\"○  SNG - USD\",\"coinType\":\"SNG\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]},{\"name\":\"Bitfinex\",\"url\":\"wss://api.bitfinex.com/ws/2\",\"data\":[{\"title\":\"○  BTC - USD\",\"coinType\":\"BTC\",\"currencyType\":\"USD\"},{\"title\":\"○  ETH - USD\",\"coinType\":\"ETH\",\"currencyType\":\"USD\"},{\"title\":\"○  LTC - USD\",\"coinType\":\"LTC\",\"currencyType\":\"USD\"},{\"title\":\"○  EOS - USD\",\"coinType\":\"EOS\",\"currencyType\":\"USD\"},{\"title\":\"○  ETC - USD\",\"coinType\":\"ETC\",\"currencyType\":\"USD\"},{\"title\":\"○  XRP - USD\",\"coinType\":\"XRP\",\"currencyType\":\"USD\"}]}]";
+
+
         ArrayList<CoinMenu> total = null;
         try {
             total = ModelUtils.toObject(jsonListList, new TypeToken<ArrayList<CoinMenu>>(){});

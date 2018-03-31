@@ -3,11 +3,11 @@ package com.example.jingze.zcryptocurrency.view.market_list;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +22,8 @@ import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.net.BitfinexManager;
 import com.example.jingze.zcryptocurrency.net.BourseActivityManager;
 import com.example.jingze.zcryptocurrency.net.HuobiManager;
+import com.example.jingze.zcryptocurrency.net.handler.UIHandler;
+import com.example.jingze.zcryptocurrency.utils.RunningTimeUtils;
 import com.example.jingze.zcryptocurrency.view.base.InfiniteAdapter;
 import com.example.jingze.zcryptocurrency.view.base.SpaceItemDecoration;
 
@@ -34,34 +36,29 @@ public class MarketListFragment extends Fragment{
     @BindView(R.id.swipe_refresh_container) SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
-    public final static String BUNDLE_KEY_STRING = "total_data";
-    public static final int ITEM_UPDATE = 100;
+    public final static String BUNDLE_KEY_STRING = "menu";
+    public static ViewPager viewPager;
 
-    private static final int ONLOADMORE_DELAY = 1300;
-    private static final int DRAGGED_RESEND_DELAY = 1500;
-    private static final int FLYING_RESEND_DELAY = 800;
-    private int scrollStart = 0;
     private CoinMenu coinMenu;
-    private Looper dataThreadLooper;
-    private Handler mainThreadHandler;
+    private UIHandler mainThreadHandler;
+    private Handler dataThreadHandler;
     private MarketListAdapter adapter;
     private LinearLayoutManager layoutManager;
     private BourseActivityManager bourseActivityManager;
 
-    private Runnable loadMoreRunnable = new Runnable() {
-        @Override
-        public void run() {
-            adapter.addOnePage();
-            adapter.notifyDataSetChanged();
-        }
-    };
+    private int currentPagePosition;
+    private int viewPagerScrollState = 0;
+    private int pagePosition;
+    private int recyclerViewScrollStart = 0;
+    private boolean hasStarted = false;
+    private View view;
 
     private InfiniteAdapter.LoadMoreListener onLoadMore = new InfiniteAdapter.LoadMoreListener(){
         @Override
         public void onLoadMore() {
-            swipeRefreshLayout.setEnabled(true);
-            mainThreadHandler.removeCallbacks(loadMoreRunnable);
-            mainThreadHandler.postDelayed(loadMoreRunnable, ONLOADMORE_DELAY);
+//            swipeRefreshLayout.setEnabled(true);
+            mainThreadHandler.removeMessages(UIHandler.ONLOADMORE_UPDATE);
+            mainThreadHandler.sendLoadmoreMessage();
         }
     };
 
@@ -75,119 +72,193 @@ public class MarketListFragment extends Fragment{
         return fragment;
     }
 
+//    @Override
+//    public void onAttach(Context context) {
+//        super.onAttach(context);
+////        Log.i("RaychTest", this.toString() + ":\t" + " onAttach()");
+//    }
+//
+//    @Override
+//    public void onCreate(@Nullable Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+////        Log.i("RaychTest", this.toString() + ":\t" + " onCreate() The savedInstanceState is null? " + (savedInstanceState == null));
+//    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_swipe_recycler_view, container, false);
-        ButterKnife.bind(this, view);
+//        Log.i("RaychTest", this.toString() + ":\t" + " onCreateView() The savedInstanceState is null? " + (savedInstanceState == null));
+        if (view == null) {
+            view = inflater.inflate(R.layout.fragment_swipe_recycler_view, container, false);
+            ButterKnife.bind(this, view);
 
-        layoutManager = new LinearLayoutManager(container.getContext());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.list_item_spacing),
-                getResources().getDimensionPixelSize(R.dimen.spacing_small)));
+            layoutManager = new LinearLayoutManager(container.getContext());
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.list_item_spacing),
+                    getResources().getDimensionPixelSize(R.dimen.spacing_small)));
+            hasStarted = false;
+        }
+        String fragmentTag = this.getTag();
+        pagePosition = Integer.parseInt(fragmentTag.substring(fragmentTag.length() - 1));
+
         return view;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mainThreadHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-                return mainThreadHandlerLogic(message);
-            }
-        });
-        setOnScrollListener(recyclerView);
-        setupSwipeRefreshLayout();
-        coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
-        setupBourseActivityManager(coinMenu);
+//        Log.i("RaychTest", this.toString() + ":\t" + " onViewCreated() The savedInstanceState is null? " + (savedInstanceState == null));
+        if (!hasStarted) {
+            coinMenu = getArguments().getParcelable(BUNDLE_KEY_STRING);
+            ArrayList<Coin> coinList = coinMenu.getData();
+            adapter = new MarketListAdapter(this, coinList, onLoadMore);
 
-        ArrayList<Coin> coinList = coinMenu.getData();
-        adapter = new MarketListAdapter(this, coinList, onLoadMore);
-        setCoinMenuOnChangeListener();
-        recyclerView.setAdapter(adapter);
+            recyclerView.setAdapter(adapter);
+        }
+        RunningTimeUtils.end("MainActivity start to Fragment onViewCreated() ends");
+//        Log.i("RaychTest", this.toString() + ":\t" + " onViewCreated()");
+    }
+
+//    @Override
+//    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+//        super.onActivityCreated(savedInstanceState);
+////        Log.i("RaychTest", this.toString() + ":\t" + " onActivityCreated() The savedInstanceState is null? " + (savedInstanceState == null));
+////        Log.i("RaychTest", this.toString() + ":\t" + " onActivityCreated()");
+//    }
+//
+//    @Override
+//    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+//        super.onViewStateRestored(savedInstanceState);
+////        Log.i("RaychTest", this.toString() + ":\t" + " onViewStateRestored() The savedInstanceState is null? " + (savedInstanceState == null));
+////        Log.i("RaychTest", this.toString() + ":\t" + " onViewStateRestored()");
+//    }
+
+//    @Override
+//    public void setUserVisibleHint(boolean isVisibleToUser) {
+//        super.setUserVisibleHint(isVisibleToUser);
+//    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onStart() {
+        super.onStart();
+//        Log.i("RaychTest", this.toString() + ":\t" + " onStart())");
+        if (mainThreadHandler == null) {
+            mainThreadHandler = new UIHandler(new UICallbackLogic());
+        }
+        if (!hasStarted) {
+            setupBourseActivityManager(coinMenu);
+            setCoinMenuOnChangeListener();
+            setupSwipeRefreshLayout();
+            setOnScrollListener(recyclerView);
+            addOnPageChangeListener();
+
+            hasStarted = true;
+        }
+        RunningTimeUtils.end("MainActivity start to onStart()");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+//        Log.i("RaychTest", this.toString() + ":\t" + " onResume()");
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+//        Log.i("RaychTest", this.toString() + ":\t" + " onSaveInstanceState())");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+//        Log.i("RaychTest", this.toString() + ":\t" + " onPause()" + "\tVisible: " + isVisible());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.i("RaychTest", "onStop() is called.");
-        bourseActivityManager.stop();
+//        Log.i("RaychTest", this.toString() + ":\t" + " onStop()");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+//        Log.i("RaychTest", this.toString() + ":\t" + " onDestroyView()");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+//        Log.i("RaychTest", this.toString() + ":\t" + " onDestroy()");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.i("RaychTest", "onDetach() is called.");
+        Log.i("RaychTest", this.toString() + ":\t" + " onDetach()");
+        bourseActivityManager.stop();
+        viewPager = null;
     }
 
-    public void setDataThreadLooper(Looper dataThreadLooper) {
-        this.dataThreadLooper = dataThreadLooper;
+    public void setDataThreadHandler(Handler dataThreadHandler) {
+        this.dataThreadHandler = dataThreadHandler;
     }
 
-    private void setupSwipeRefreshLayout() {
-        swipeRefreshLayout.setEnabled(false);
-        swipeRefreshLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        adapter.resetPage();
-                        adapter.notifyDataSetChanged();
-                        mainThreadHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                swipeRefreshLayout.setEnabled(false);
-                                swipeRefreshLayout.setRefreshing(false);
-                            }
-                        }, 1300);
-                    }
-                });
-    }
 
-    private void setupBourseActivityManager(CoinMenu coinMenu) {
+    private void setupBourseActivityManager(final CoinMenu coinMenu) {
+        final int DELAY = 1000;
+        int setupDelay = (currentPagePosition == pagePosition ? 0 : DELAY);
         switch (coinMenu.getName()) {
             case "Bitfinex": {
-                bourseActivityManager = new BitfinexManager(getContext(), dataThreadLooper, coinMenu);
-                bourseActivityManager.startConnection();
+                dataThreadHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        bourseActivityManager = new BitfinexManager(dataThreadHandler.getLooper(), coinMenu);
+                        bourseActivityManager.startConnection();
+                    }
+                }, setupDelay);
                 break;
             }
             case "Huobi": {
-                bourseActivityManager = new HuobiManager(getContext(), dataThreadLooper, coinMenu);
-                bourseActivityManager.startConnection();
+                dataThreadHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        bourseActivityManager = new HuobiManager(dataThreadHandler.getLooper(), coinMenu);
+                        bourseActivityManager.startConnection();
+                    }
+                }, setupDelay);
+
                 break;
             }
             default: {
                 Log.e("Raych",
                         "MarketListFragment.startupBourseActivityManager() failed to create BourseActivityManager");
+//                dataThreadHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                    }
+//                }, setupDelay);
             }
         }
-
     }
 
     private void setCoinMenuOnChangeListener() {
         coinMenu.setOnChangeListener(new CoinMenu.OnChangeListener() {
             @Override
             public void onCoinChanged(final int position) {
-//                Log.i("RaychTest", "onCoinChanged() is reCalled");
+//                Log.i("RaychTest", "Position: " + position);
                 //@param what The value indicates what the message is about.
                 //@param arg1 The value indicates which position of the coin to be handled.
                 //@param arg2 The value indicates how many times has this message been posted previously..
-                Message msg = mainThreadHandler.obtainMessage(ITEM_UPDATE, position, 0);
-                mainThreadHandler.sendMessage(msg);
-//                mainThreadHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        int firstPosition = layoutManager.findFirstVisibleItemPosition();
-//                        int lastPosition = layoutManager.findLastVisibleItemPosition();
-//                        //Only update the item that is visible, and only when the screen is stop.
-//                        if (position <= lastPosition && position >= firstPosition) {
-//                            adapter.notifyItemChanged(position);
-//                        }
-//                    }
-//                });
+                if (pagePosition == currentPagePosition) {
+                    mainThreadHandler.sendItemUpdateMessage(position, 0);
+                }
             }
 
             @Override
@@ -197,12 +268,32 @@ public class MarketListFragment extends Fragment{
         });
     }
 
+    private void setupSwipeRefreshLayout() {
+        swipeRefreshLayout.setEnabled(false);
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+//                        mainThreadHandler.sendPageUpdateMessageDelay(0, UIHandler.PAGE_UPDATE_DELAY);
+                        mainThreadHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.resetPage();
+                                swipeRefreshLayout.setRefreshing(false);
+                                swipeRefreshLayout.setEnabled(true);
+                            }
+                        }, 1300);
+                    }
+                });
+        swipeRefreshLayout.setEnabled(true);
+    }
+
     private void setOnScrollListener(RecyclerView recyclerView) {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                scrollStart = newState;
+                recyclerViewScrollStart = newState;
             }
         });
 
@@ -214,26 +305,60 @@ public class MarketListFragment extends Fragment{
 //        });
     }
 
-    private boolean mainThreadHandlerLogic(Message message) {
-        //Message that has been resend more than 2 times will not be handled.
-        if (message.what ==ITEM_UPDATE && message.arg2 < 3) {
-            final int position = message.arg1;
-            if (scrollStart == 0) {             //IDLE: Not scrolling action.
-                final int firstPosition = layoutManager.findFirstVisibleItemPosition() - 1;
-                final int lastPosition = layoutManager.findLastVisibleItemPosition() + 1;
-                if (position <= lastPosition && position >= firstPosition) {
-                    adapter.notifyItemChanged(position);
-                }
-            } else if (scrollStart == 1) {      //DRAGGING: is being dragged to scroll.
-                int resendTimes = ++message.arg2;
-                Message msg = mainThreadHandler.obtainMessage(ITEM_UPDATE, position, resendTimes);
-                mainThreadHandler.sendMessageDelayed(msg, DRAGGED_RESEND_DELAY * resendTimes);
-            } else if (scrollStart == 2) {      //FLYING: is scrolling automatically.
-                int resendTimes = ++message.arg2;
-                Message msg = mainThreadHandler.obtainMessage(ITEM_UPDATE, position, resendTimes);
-                mainThreadHandler.sendMessageDelayed(msg, FLYING_RESEND_DELAY * resendTimes);
+    private void addOnPageChangeListener() {
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
             }
+
+            @Override
+            public void onPageSelected(int position) {
+                currentPagePosition = position;
+                if (pagePosition == position && hasStarted) {
+                    mainThreadHandler.sendPageUpdateMessageDelay(0, UIHandler.PAGE_UPDATE_DELAY);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                viewPagerScrollState = state;
+            }
+        });
+    }
+
+    private class UICallbackLogic implements Handler.Callback {
+        @Override
+        public boolean handleMessage(Message message) {
+            //Message that has been resend more than 2 times will not be handled.
+            int event = message.what;
+            int attempts = message.arg2;
+
+            if (event == UIHandler.ITEM_UPDATE && attempts < 3) {
+                int preloadNumber = 5;
+                final int position = message.arg1;
+
+                if (recyclerViewScrollStart == 0) {             //IDLE: Not scrolling action.
+                    final int firstPosition = layoutManager.findFirstVisibleItemPosition() - preloadNumber;
+                    final int lastPosition = layoutManager.findLastVisibleItemPosition() + preloadNumber;
+                    if (position < lastPosition  && position > firstPosition) {
+                        adapter.notifyItemChanged(position, "PART");
+                    }
+                } else if (recyclerViewScrollStart == 1) {      //DRAGGING: is being dragged to scroll.
+                    mainThreadHandler.sendItemUpdateMessageDelay(position, ++attempts, UIHandler.RV_DRAGGED_RESEND_DELAY * attempts);
+                } else if (recyclerViewScrollStart == 2) {      //FLYING: is scrolling automatically.
+                    mainThreadHandler.sendItemUpdateMessageDelay(position, ++attempts, UIHandler.RV_FLYING_RESEND_DELAY * attempts);
+                }
+            } else if (event == UIHandler.PAGE_UPDATE && currentPagePosition == pagePosition) {
+                if (viewPagerScrollState == 0) {
+                    adapter.notifyItemRangeChanged(0, adapter.getItemCount(), "PART");
+                }else {
+                    mainThreadHandler.sendPageUpdateMessageDelay(0, UIHandler.VP_DRAGGED_RESEND_DELAY);
+                }
+            } else if (event == UIHandler.ONLOADMORE_UPDATE) {
+                adapter.addOnePage();
+            }
+            return false;
         }
-        return false;
     }
 }

@@ -22,9 +22,6 @@ public class Coin implements Parcelable{
     private Double dailyChange;
     private OnChangedListener onChangedListener;
 
-    public String getTitle() {
-        return title;
-    }
 
     //Interface
     public interface OnChangedListener{
@@ -43,6 +40,13 @@ public class Coin implements Parcelable{
     }
 
     //Getters and Setters
+    public String getTitle() {
+        if (title == null) {
+            title = "○  " + coinType + " - " + currencyType;
+        }
+        return title;
+    }
+
     public String getCoinType() {
         return coinType;
     }

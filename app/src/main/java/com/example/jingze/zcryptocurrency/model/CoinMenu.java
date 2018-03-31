@@ -110,7 +110,7 @@ public class CoinMenu implements Parcelable{
         }
     }
 
-    public void updateCoin(int chanId, Coin newCoinData) {
+    public void updateCoin(int chanId, final Coin newCoinData) {
         Log.i("Raych", "chanId: " + chanId + " is updated.");
         Coin coinToBeUpdate = directory.getCoin(chanId);
         if (coinToBeUpdate != null) {

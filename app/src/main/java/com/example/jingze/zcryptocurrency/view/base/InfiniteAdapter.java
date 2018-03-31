@@ -3,7 +3,6 @@ package com.example.jingze.zcryptocurrency.view.base;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,7 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
     private final LoadMoreListener loadMoreListener;
     private int dataSize;
     private static final int ITEMS_PER_PAGE = 10;
-    private int page = 0;
+    private int pageNumber = 0;
 
 
     public interface LoadMoreListener {
@@ -65,14 +64,19 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
     }
 
     @Override
+    public void onBindViewHolder(BaseViewHolder holder, int position, List<Object> payloads) {
+        onBindViewHolder(holder, position);
+    }
+
+    @Override
     public int getItemCount() {
-        return hasMoreData ? (ITEMS_PER_PAGE * this.page + 1) : data.size();
+        return hasMoreData ? (ITEMS_PER_PAGE * this.pageNumber + 1) : data.size();
     }
 
     @Override
     public int getItemViewType(int position) {
         if (hasMoreData) {
-            return position >= (ITEMS_PER_PAGE * page) ? VIEWTYPE_LOADING : VIEWTYPE_ITEM;
+            return position >= (ITEMS_PER_PAGE * pageNumber) ? VIEWTYPE_LOADING : VIEWTYPE_ITEM;
         } else {
             return VIEWTYPE_ITEM;
         }
@@ -99,14 +103,17 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
     }
 
     public void addOnePage() {
-        page++;
-        hasMoreData = (dataSize > page * ITEMS_PER_PAGE);
+        pageNumber++;
+        hasMoreData = (dataSize > pageNumber * ITEMS_PER_PAGE);
+        notifyItemRangeChanged((pageNumber - 1) * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
     }
 
     public void resetPage() {
-        page = 1;
+        pageNumber = 0;
         hasMoreData = (data.size() > ITEMS_PER_PAGE);
+        notifyDataSetChanged();
     }
+
 
 //    public boolean isScrolling() {
 //        return isScrolling;
@@ -127,5 +134,7 @@ public abstract class InfiniteAdapter<T> extends RecyclerView.Adapter<BaseViewHo
     protected abstract BaseViewHolder onCreateItemViewHolder(ViewGroup parent, int viewType);
 
     protected abstract void onBindItemViewHolder(BaseViewHolder holder, int position);
+
+    protected abstract void onBindItemViewHolder(BaseViewHolder holder, int position, List<Object> payloads);
 
 }

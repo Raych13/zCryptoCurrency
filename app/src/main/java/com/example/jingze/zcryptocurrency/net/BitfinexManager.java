@@ -1,6 +1,5 @@
 package com.example.jingze.zcryptocurrency.net;
 
-import android.content.Context;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
@@ -120,8 +119,8 @@ public class BitfinexManager extends BourseActivityManager {
         public static final String BOOKS = "books";
     }
 
-    public BitfinexManager(Context context, Looper dataThreadLooper, CoinMenu coinMenu) {
-        super(context, dataThreadLooper, coinMenu);
+    public BitfinexManager(Looper dataThreadLooper, CoinMenu coinMenu) {
+        super(dataThreadLooper, coinMenu);
     }
 
     @Override
@@ -134,7 +133,7 @@ public class BitfinexManager extends BourseActivityManager {
 
                 String url = coinMenu.getUrl();
                 webManager= new WebSocketManager
-                        .Builder(context, mainThreadHandler, dataThreadHandler)
+                        .Builder(mainThreadHandler, dataThreadHandler)
                         .url(url)
                         .isNeedReconnect(true)
                         .build();
@@ -170,7 +169,6 @@ public class BitfinexManager extends BourseActivityManager {
 
     @Override
     public void stop() {
-        Log.i("RaychTest", "stop() is called.");
 //        unsubscribeAllCoins();
         webManager.stopConnect();
     }

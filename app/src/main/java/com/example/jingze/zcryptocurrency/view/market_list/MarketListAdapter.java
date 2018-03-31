@@ -87,6 +87,11 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         }
     }
 
+    @Override
+    protected void onBindItemViewHolder(BaseViewHolder holder, int position, List<Object> payloads) {
+        onBindItemViewHolder(holder, position);
+    }
+
     private void setBackgroundColorAndChangeSymbol(MarketListViewHolder marketListViewHolder, Drawable newBG, int newColor, Drawable newSymbol, boolean showSymbol) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (marketListViewHolder.item_change_bg.getTag() == null || marketListViewHolder.item_change_bg.getTag() != newBG) {

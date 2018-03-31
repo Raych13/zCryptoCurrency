@@ -1,6 +1,5 @@
 package com.example.jingze.zcryptocurrency.net;
 
-import android.content.Context;
 import android.os.Looper;
 import android.os.Message;
 
@@ -15,8 +14,8 @@ public class PoloniexManager extends BourseActivityManager{
     public static class Event{
     }
 
-    public PoloniexManager(Context context, Looper dataThreadLooper, CoinMenu coinMenu) {
-        super(context, dataThreadLooper, coinMenu);
+    public PoloniexManager(Looper dataThreadLooper, CoinMenu coinMenu) {
+        super(dataThreadLooper, coinMenu);
     }
 
     @Override

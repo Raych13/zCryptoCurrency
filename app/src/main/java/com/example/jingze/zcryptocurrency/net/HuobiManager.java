@@ -1,6 +1,5 @@
 package com.example.jingze.zcryptocurrency.net;
 
-import android.content.Context;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
@@ -119,8 +118,8 @@ public class HuobiManager extends BourseActivityManager {
     }
 
 
-    public HuobiManager(Context context, Looper dataThreadLooper, CoinMenu coinMenu) {
-        super(context, dataThreadLooper, coinMenu);
+    public HuobiManager(Looper dataThreadLooper, CoinMenu coinMenu) {
+        super(dataThreadLooper, coinMenu);
     }
 
     @Override
@@ -133,7 +132,7 @@ public class HuobiManager extends BourseActivityManager {
 
                 String url = coinMenu.getUrl();
                 webManager= new WebSocketManager
-                        .Builder(context, mainThreadHandler, dataThreadHandler)
+                        .Builder(mainThreadHandler, dataThreadHandler)
                         .url(url)
                         .isNeedReconnect(true)
                         .build();

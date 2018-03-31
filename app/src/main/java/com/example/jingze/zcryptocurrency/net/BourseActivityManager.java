@@ -1,6 +1,5 @@
 package com.example.jingze.zcryptocurrency.net;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -14,7 +13,6 @@ import com.example.jingze.zcryptocurrency.net.WebManager;
  */
 
 public abstract class BourseActivityManager {
-    Context context;
     WebManager webManager;
     Looper dataThreadLooper;
     Handler mainThreadHandler;
@@ -23,8 +21,7 @@ public abstract class BourseActivityManager {
     boolean isFirstStart = true;
 
     //Constructor
-    public BourseActivityManager(Context context, Looper dataThreadLooper, CoinMenu coinMenu) {
-        this.context = context;
+    public BourseActivityManager(Looper dataThreadLooper, CoinMenu coinMenu) {
         this.mainThreadHandler = new Handler(Looper.getMainLooper());
         this.dataThreadLooper = dataThreadLooper;
         this.coinMenu = coinMenu;

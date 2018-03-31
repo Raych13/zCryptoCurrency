@@ -1,14 +1,11 @@
 package com.example.jingze.zcryptocurrency.net;
 
-import android.app.Activity;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
+import com.example.jingze.zcryptocurrency.utils.NetworkServiceUtils;
 import com.example.jingze.zcryptocurrency.utils.SnackBarUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -31,7 +28,6 @@ public class WebSocketManager extends WebManager{
     public final static int MESSAGE_TYPE_BYTES = 101;
     private final static int RECONNECT_INTERVAL = 5 * 1000;    //Reconnection interval
     private final static long RECONNECT_MAX_TIME = 60 * 1000;   //Maximum reconnection time
-    private Context mContext;
     private String coinMenuName;
     private String serverURL;
     private OkHttpClient client;
@@ -118,7 +114,6 @@ public class WebSocketManager extends WebManager{
 
     //Constructor
     WebSocketManager(Builder builder) {
-        this.mContext = builder.mContext;
         this.coinMenuName = builder.coinMenuName;
         this.serverURL = builder.serverURL;
         this.isNeedReconnect = builder.isNeedReconnect;
@@ -195,7 +190,7 @@ public class WebSocketManager extends WebManager{
 
     //Private methods below:
     private synchronized void buildConnection() {
-        if (!isNetworkServiceAvailable(mContext)) {
+        if (!NetworkServiceUtils.isNetworkServiceAvailable()) {
             Log.e("Raych", "NetworkServiceUnavailable.");
             setCurrentStatus(Status.DISCONNECTED);
             whenNetworkUnavailable();
@@ -261,7 +256,7 @@ public class WebSocketManager extends WebManager{
         if (!isNeedReconnect || isManualClose) {
             return;
         }
-        if (!isNetworkServiceAvailable(mContext)) {
+        if (!NetworkServiceUtils.isNetworkServiceAvailable()) {
             Log.e("Raych", "NetworkServiceUnavailable.");
             setCurrentStatus(Status.DISCONNECTED);
             whenNetworkUnavailable();
@@ -282,19 +277,19 @@ public class WebSocketManager extends WebManager{
 
     //Check if the networkService is available. (isNetworkConnected)
     //To be done: when network is closed.
-    private boolean isNetworkServiceAvailable(final Context context) {
-        if (context != null) {
-            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo mNetworkInfo = mConnectivityManager
-                    .getActiveNetworkInfo();
-            if (mNetworkInfo != null) {
-                return mNetworkInfo.isAvailable();
-            }
-           //when network is closed.
-        }
-        return false;
-    }
+//    private boolean isNetworkServiceAvailable(final Context context) {
+//        if (context != null) {
+//            ConnectivityManager mConnectivityManager = (ConnectivityManager) context
+//                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+//            NetworkInfo mNetworkInfo = mConnectivityManager
+//                    .getActiveNetworkInfo();
+//            if (mNetworkInfo != null) {
+//                return mNetworkInfo.isAvailable();
+//            }
+//           //when network is closed.
+//        }
+//        return false;
+//    }
 
     private void whenNetworkUnavailable() {
         Runnable runnable = SnackBarUtils.getSnackBarRunnable("Network is unavailable.", Snackbar.LENGTH_LONG);
@@ -321,7 +316,6 @@ public class WebSocketManager extends WebManager{
     }
 
     public static final class Builder {
-        private Context mContext;
         private String coinMenuName;
         private String serverURL;
         private boolean isNeedReconnect = true;
@@ -330,10 +324,8 @@ public class WebSocketManager extends WebManager{
         private OkHttpClient client;
         private WebSocketExtraListener webSocketExtraListener;
 
-        public Builder(Context context,
-                       Handler mainThreadHandler,
+        public Builder(Handler mainThreadHandler,
                        Handler dataThreadHandler) {
-            this.mContext = context;
             this.mainThreadHandler = mainThreadHandler;
             this.dataThreadHandler = dataThreadHandler;
         }
