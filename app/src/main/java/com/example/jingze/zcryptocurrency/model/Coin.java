@@ -14,19 +14,12 @@ public class Coin implements Parcelable{
     private String coinType;
     @Expose
     private String currencyType;
-    private Integer positionInMenu;
+    private Integer positionInList;
     @Expose
     private Double price;
     @Expose
     private Double dailyChangeRate;
     private Double dailyChange;
-    private OnChangedListener onChangedListener;
-
-
-    //Interface
-    public interface OnChangedListener{
-        void onPriceOrRateChange(int positionInMenu);
-    }
 
    //Constructor with Builder
     public Coin(){
@@ -73,26 +66,19 @@ public class Coin implements Parcelable{
         return false;
     }
 
-    public synchronized boolean setPriceAndRate(Double price, Double dailyChangeRate) {
+    public synchronized boolean setPriceAndChangeRate(Double price, Double dailyChangeRate) {
         this.price = price;
         this.dailyChangeRate = dailyChangeRate;
-        if (onChangedListener != null) {
-            onChangedListener.onPriceOrRateChange(positionInMenu);
-        }
         return true;
     }
 
-    public Integer getPositionInMenu() {
-        return positionInMenu;
+    public Integer getPositionInList() {
+        return positionInList;
     }
 
-    public synchronized boolean setPositionInMenu(Integer positionInMenu) {
-        this.positionInMenu = positionInMenu;
+    public synchronized boolean setPositionInList(Integer positionInList) {
+        this.positionInList = positionInList;
         return true;
-    }
-
-    public void setOnChangedListener(OnChangedListener onChangedListener) {
-        this.onChangedListener = onChangedListener;
     }
 
     //Parcelable
@@ -100,9 +86,9 @@ public class Coin implements Parcelable{
         coinType = in.readString();
         currencyType = in.readString();
         if (in.readByte() == 0) {
-            positionInMenu = null;
+            positionInList = null;
         } else {
-            positionInMenu = in.readInt();
+            positionInList = in.readInt();
         }
         if (in.readByte() == 0) {
             price = null;
@@ -120,11 +106,11 @@ public class Coin implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(coinType);
         dest.writeString(currencyType);
-        if (positionInMenu == null) {
+        if (positionInList == null) {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeInt(positionInMenu);
+            dest.writeInt(positionInList);
         }
         if (price == null) {
             dest.writeByte((byte) 0);

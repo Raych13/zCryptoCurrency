@@ -1,8 +1,9 @@
 package com.example.jingze.zcryptocurrency.model;
 
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.Expose;
 
@@ -13,14 +14,18 @@ import java.util.ArrayList;
  */
 
 public class CoinMenu implements Parcelable{
+    private static final int minUpdateMinSpan = 1000;
+    private static int updateMinSpan = minUpdateMinSpan;
+
     @Expose
     private String name;
     @Expose
     private String url;
     @Expose
     private ArrayList<Coin>  data;
-    public Directory<Integer> directory;
     boolean orderChangedLock;
+    //true: data has been updated, it's unable to update again.
+    private boolean[] checkList;
     private OnChangeListener onChangeListener;
 
     public interface OnChangeListener {
@@ -38,11 +43,14 @@ public class CoinMenu implements Parcelable{
         this.url = url;
         this.data = data;
         orderChangedLock = false;
-        this.directory = new Directory<>();
-        assignPositionToCoin();
+        updateCoinPositionInList();
     }
 
     //Getters and Setters
+    public static void setUpdateMinSpan(int updateMinSpan) {
+        CoinMenu.updateMinSpan = updateMinSpan;
+    }
+
     public ArrayList<Coin> getData() {
         return data;
     }
@@ -92,49 +100,25 @@ public class CoinMenu implements Parcelable{
         return data.size();
     }
 
-    //
-    public void updateCoinPositionToCoin() {
-        for (int i = 0; i < data.size(); i++) {
-            data.get(i).setPositionInMenu(i);
-        }
-    }
-
     //Data Operations
-    public void buildConnection(Coin coin, Integer chanId) {
-        int position = getPosition(coin.getCoinType(), coin.getCurrencyType());
-        if (position != -1 && position < data.size()) {
-            if (directory == null) {
-                directory = new Directory<>();
-            }
-            directory.write(data.get(position), chanId);
+    public synchronized void initiate() {
+        checkList = new boolean[data.size()];
+        updateCoinPositionInList();
+    }
+
+    public synchronized void updateCoinPositionInList() {
+        for (int i = 0; i < data.size(); i++) {
+            data.get(i).setPositionInList(i);
         }
     }
 
-    public void updateCoin(int chanId, final Coin newCoinData) {
-        Log.i("Raych", "chanId: " + chanId + " is updated.");
-        Coin coinToBeUpdate = directory.getCoin(chanId);
-        if (coinToBeUpdate != null) {
-            coinToBeUpdate.setPriceAndRate(newCoinData.getPrice(), newCoinData.getDailyChangeRate());
-            if (onChangeListener != null) {
-                Integer position = coinToBeUpdate.getPositionInMenu();
-                if (position != null) {
-                    onChangeListener.onCoinChanged(position);
-                }
-            }
-        } else {
-            Log.e("Raych", "CoinMenu.updateCoin(), Coin: "
-                    + newCoinData.getCoinType()
-                    + "-" + newCoinData.getCurrencyType() + " is Not Found.");
-        }
-    }
-
-    public void heartbeatting(int chanId) {
-        Log.i("Raych", "chanId: " + chanId + " is updated.");
-        Coin coinToBeUpdate = directory.getCoin(chanId);
+    public void updateCoin(@NonNull final Coin coinToBeUpdated, @NonNull final Coin newCoinData) {
+        coinToBeUpdated.setPriceAndChangeRate(newCoinData.getPrice(), newCoinData.getDailyChangeRate());
         if (onChangeListener != null) {
-            Integer position = coinToBeUpdate.getPositionInMenu();
-            if (position != null) {
+            Integer position = coinToBeUpdated.getPositionInList();
+            if (position != null && !checkList[position]) {
                 onChangeListener.onCoinChanged(position);
+                checkList[position] = true;
             }
         }
     }
@@ -178,7 +162,7 @@ public class CoinMenu implements Parcelable{
     };
 
     //Private Methods
-    private int getPosition(String coinType, String currencyType) {
+    public int getCoinPositionInListByType(String coinType, String currencyType) {
         int cursor = 0;
         for (; cursor < data.size(); cursor++) {
             Coin cursorCoin = data.get(cursor);
@@ -189,9 +173,20 @@ public class CoinMenu implements Parcelable{
         return -1;
     }
 
-    private void assignPositionToCoin() {
-        for (int i = 0; i < data.size(); i++) {
-            data.get(i).setPositionInMenu(i);
+    public void resetCheckList() {
+        for (int i = 0; i < checkList.length; i++) {
+            checkList[i] = false;
         }
+    }
+
+    public void postResetCheckListRunnable(final Handler handler) {
+        final class ResetCheckListRunnable implements Runnable{
+            @Override
+            public void run() {
+                resetCheckList();
+                postResetCheckListRunnable(handler);
+            }
+        }
+        handler.postDelayed(new ResetCheckListRunnable(), updateMinSpan);
     }
 }

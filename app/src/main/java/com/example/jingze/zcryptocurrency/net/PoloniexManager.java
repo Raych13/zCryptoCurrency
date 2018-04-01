@@ -25,7 +25,12 @@ public class PoloniexManager extends BourseActivityManager {
     }
 
     @Override
-    public void subscribe(String channel, Coin coin) {
+    public void subscribe(Coin coin) {
+
+    }
+
+    @Override
+    public void subscribe(String channel, Coin coin, int delay) {
 
     }
 
@@ -40,7 +45,7 @@ public class PoloniexManager extends BourseActivityManager {
     }
 
     @Override
-    protected boolean handlerLogic(Message message) {
+    protected boolean callbackLogic(Message message) {
         return false;
     }
 }
