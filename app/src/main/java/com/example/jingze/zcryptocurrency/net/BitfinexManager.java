@@ -202,26 +202,26 @@ public class BitfinexManager extends BourseActivityManager {
             Event newMsg = parseData((String) message.obj);
             switch (newMsg.event) {
                 case EVENT_TYPE.HEARTBEATTING: {
-//                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(HeartBeating): ");
+//                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(HeartBeating): ");
 //                        coinMenu.heartbeatting(newMsg.chanId);
                     heartbeating(newMsg.chanId);
                     break;
                 }
                 case EVENT_TYPE.UPDATE: {
-                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Update): ");
+                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Update): ");
                     if (newMsg.coin != null) {
                         updateCoin(newMsg.chanId, newMsg.coin);
                     }
                     break;
                 }
                 case EVENT_TYPE.SUBSCRIBED: {
-                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Subscribed): ");
+                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Subscribed): ");
                     subscribed(newMsg);
                     break;
 
                 }
                 case EVENT_TYPE.INFO: {
-                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Info): ");
+                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Info): ");
                     if (isFirstStart) {
                         subscribeAllCoins();
                         postFailureListCheckRunnable();
@@ -230,16 +230,16 @@ public class BitfinexManager extends BourseActivityManager {
                     break;
                 }
                 case EVENT_TYPE.UNSUBSCRIBED: {
-                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Subscribed): ");
+                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Subscribed): ");
                     directory.remove(newMsg.chanId);
                     break;
                 }
                 case EVENT_TYPE.ERROR: {
-                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Error): ");
+                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Error): ");
                     break;
                 }
                 default: {
-                    Log.i("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Unknown): ");
+                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(Unknown): ");
                 }
             }
         }
@@ -307,7 +307,6 @@ public class BitfinexManager extends BourseActivityManager {
     }
 
     private void heartbeating(Integer id) {
-        Log.i("Raych", "id: " + id + " is updated.");
         Coin coinToBeUpdated = directory.getCoin(id);
         if (coinToBeUpdated != null) {
             int position = coinToBeUpdated.getPositionInList();

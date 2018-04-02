@@ -16,9 +16,10 @@
         android:layout_height="@dimen/icon_medium"
         android:layout_weight="1"
         android:gravity="center_vertical|left"
+        android:maxLines="1"
         android:textSize="@dimen/textSize_large"
         android:textColor="@color/item_text_color"
-        tools:text="BTC - USD"/>
+        tools:text="○  QTUM - USDT"/>
 
     <TextView
         android:id="@+id/marketList_item_price_txv"

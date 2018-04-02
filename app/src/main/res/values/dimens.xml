@@ -38,7 +38,7 @@
     <dimen name="nav_header_login_btn_margin_left">-8dp</dimen>
     <dimen name="nav_header_user_picture_size">48dp</dimen>
 
-    <dimen name="price_txv_size">108dp</dimen>
+    <dimen name="price_txv_size">98dp</dimen>
     <dimen name="item_price_and_change_text_size">19sp</dimen>
     <dimen name="item_change_txv_width">98dp</dimen>
     <dimen name="item_change_txv_height">36dp</dimen>
