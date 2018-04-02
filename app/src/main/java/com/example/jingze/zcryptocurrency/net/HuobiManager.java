@@ -130,9 +130,9 @@ public class HuobiManager extends BourseActivityManager {
         dataThreadHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                webManager.send("{\"ping\":1522618035242}");
+                webManager.send("{\"ping\":1522618083433}");
             }
-        }, 500);
+        }, 1000);
     }
 
     @Override
@@ -272,6 +272,10 @@ public class HuobiManager extends BourseActivityManager {
             String coinType = symbol.substring(7, 10);
             String currencyType = symbol.substring(10,14);
             newCoin = new Coin.Builder(coinType, currencyType).build();
+        } else if (index == 13) {
+            String coinType = symbol.substring(7, 9);
+            String currencyType = symbol.substring(9,13);
+            newCoin = new Coin.Builder(coinType, currencyType).build();
         }
         return  newCoin;
     }
@@ -288,6 +292,9 @@ public class HuobiManager extends BourseActivityManager {
             return namePair.hashCode();
         } else if (index == 14) {
             String namePair = symbol.substring(7, 14);
+            return namePair.hashCode();
+        } else if (index == 13) {
+            String namePair = symbol.substring(7, 13);
             return namePair.hashCode();
         }
         return -1;

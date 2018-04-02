@@ -66,7 +66,7 @@ public class WebSocketManager extends WebManager {
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
-            Log.i("Raych", "Get Message(text) from WebSocket. ");
+            Log.v("Raych", "Get Message(text) from WebSocket. ");
             Message msg = dataThreadHandler.obtainMessage(MESSAGE_TYPE_TEXT, text);
             dataThreadHandler.sendMessage(msg);
             if (webSocketExtraListener != null) {
@@ -76,7 +76,7 @@ public class WebSocketManager extends WebManager {
 
         @Override
         public void onMessage(WebSocket webSocket, ByteString bytes) {
-            Log.i("Raych", "Get Message from(bytes) WebSocket.");
+            Log.v("Raych", "Get Message from(bytes) WebSocket.");
             Message msg = dataThreadHandler.obtainMessage(MESSAGE_TYPE_BYTES, bytes);
             dataThreadHandler.sendMessage(msg);
             if (webSocketExtraListener != null) {
@@ -105,7 +105,7 @@ public class WebSocketManager extends WebManager {
 
         @Override
         public void onFailure(WebSocket webSocket, Throwable throwable, Response response) {
-            Log.i("Raych", "WebManager: " + serverURL + ". onFailure() is called.");
+            Log.w("Raych", "WebManager: " + serverURL + ". onFailure() is called.");
             attemptReconnect();
             if (webSocketExtraListener != null) {
                 webSocketExtraListener.onFailure(throwable,response);
@@ -123,7 +123,6 @@ public class WebSocketManager extends WebManager {
         this.dataThreadHandler = builder.dataThreadHandler;
         this.webSocketExtraListener = builder.webSocketExtraListener;
         this.mLock = new ReentrantLock();
-        Log.i("Raych", "WebSocketManager is created.");
     }
 
 //    public void disconnect() {
@@ -155,14 +154,14 @@ public class WebSocketManager extends WebManager {
     // Public methods of managing connection.
     @Override
     public void startConnect() {
-        Log.i("Raych", "WebManager: startConnect() is called.");
+        Log.i("Raych", this + "WebManager: startConnect() is called.");
         isManualClose = false;
         buildConnection();
     }
 
     @Override
     public void stopConnect() {
-        Log.i("Raych", "WebSocketManager: stopConnect() is called.");
+        Log.i("Raych", this + " WebSocketManager: stopConnect() is called.");
         isManualClose = true;
         disconnect();
     }
@@ -233,7 +232,7 @@ public class WebSocketManager extends WebManager {
     }
 
     private void connected() {
-        Log.i("Raych", "WebSocketManager: connected() is called.");
+        Log.i("Raych", this + " WebSocketManager: connected() is called.");
         cancelReconnect();
     }
 

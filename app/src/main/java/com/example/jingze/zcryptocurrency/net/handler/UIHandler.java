@@ -13,7 +13,7 @@ public class UIHandler extends Handler{
     public static final int PAGE_UPDATE = 101;
     public static final int ONLOADMORE_UPDATE = 102;
 
-    public static final int ONLOADMORE_DELAY = 1300;
+    public static final int ONLOADMORE_DELAY = 800;
     public static final int PAGE_UPDATE_DELAY = 200;
 
 

@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.gson.annotations.Expose;
 
@@ -108,6 +109,7 @@ public class CoinMenu implements Parcelable{
 
     public synchronized void updateCoinPositionInList() {
         for (int i = 0; i < data.size(); i++) {
+            Log.d("Raych", this + " Position: " + i);
             data.get(i).setPositionInList(i);
         }
     }
