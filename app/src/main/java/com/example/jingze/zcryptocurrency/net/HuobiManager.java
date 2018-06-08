@@ -7,6 +7,7 @@ import android.util.Log;
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
+import com.example.jingze.zcryptocurrency.net.base.WebManager;
 import com.example.jingze.zcryptocurrency.utils.GZipUtils;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
 import com.google.gson.annotations.SerializedName;
@@ -21,7 +22,8 @@ import okio.ByteString;
  */
 
 public class HuobiManager extends BourseActivityManager {
-
+    private static final String API_URL = "wss://api.huobipro.com/ws";
+    private WebManager webManager;
     public static class Event {
         public Long ping;
         public Long pong;
@@ -116,10 +118,9 @@ public class HuobiManager extends BourseActivityManager {
                 //position may be changed.
                 coinMenu.initiate();
 
-                String url = coinMenu.getUrl();
                 webManager= new WebSocketManager
                         .Builder(mainThreadHandler, dataThreadHandler)
-                        .url(url)
+                        .url(API_URL)
                         .isNeedReconnect(true)
                         .build();
                 webManager.startConnect();
@@ -165,7 +166,7 @@ public class HuobiManager extends BourseActivityManager {
     @Override
     protected boolean callbackLogic(Message message) {
         if (message.what == WebSocketManager.MESSAGE_TYPE_BYTES) {
-            Event newEvent = parseData(message);
+            Event newEvent = parseMessage(message);
             if (newEvent.tick != null) {
                 Log.v("Raych", "HuobiManager.callbackLogic(): Get a Huobi.Event(Update)." + newEvent.tick);
                 update(newEvent);
@@ -198,7 +199,7 @@ public class HuobiManager extends BourseActivityManager {
     }
 
     //Private Methods
-    private Event parseData(Message message) {
+    private Event parseMessage(Message message) {
         String str = GZipUtils.uncompressToString(((ByteString) message.obj).toByteArray());
         Log.i("RaychTest", "Message: " + str);
         Event newEvent = null;

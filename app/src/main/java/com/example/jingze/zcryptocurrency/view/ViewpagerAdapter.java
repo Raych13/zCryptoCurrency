@@ -44,14 +44,24 @@ public class ViewpagerAdapter extends FragmentPagerAdapter{
     }
 
     public void setupTabLayout(ArrayList<CoinMenu> mainMenu) {
-        tabLayout.setBackgroundColor(
-                tabLayout.getContext().getResources().getColor(R.color.main_bg));
+//        tabLayout.setBackgroundColor(
+//                tabLayout.getContext().getResources().getColor(R.color.main_bg));
+//        tabLayout.setSelectedTabIndicatorColor(
+//                tabLayout.getContext().getResources().getColor(R.color.lemonYellow));
+//        tabLayout.setBackgroundColor(
+//                tabLayout.getContext().getResources().getColor(R.color.lemonYellow));
+        tabLayout.setSelectedTabIndicatorHeight(7);
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
         tabLayout.setSelectedTabIndicatorColor(
-                tabLayout.getContext().getResources().getColor(R.color.lemonYellow));
+                tabLayout.getContext().getResources().getColor(R.color.pureWhite));
         for (int i = 0; i < mainMenu.size(); i++) {
             switch (mainMenu.get(i).getName()){
                 case "Bitfinex": {
                     tabLayout.getTabAt(i).setIcon(R.drawable.ic_bitfinexlogo);
+                    break;
+                }
+                case "Poloniex": {
+                    tabLayout.getTabAt(i).setIcon(R.mipmap.ic_poloniex);
                     break;
                 }
                 case "Huobi": {

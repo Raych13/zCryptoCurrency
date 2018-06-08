@@ -64,7 +64,8 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         String price = CoinUtils.priceWithCurrencySymbol(coin.getPrice(), coin.getCurrencyType());
         String changeRate = CoinUtils.convertToPercentage(coin.getDailyChangeRate());
 
-        if (marketListViewHolder.item_title_txv.getTag() == null || marketListViewHolder.item_title_txv.getTag() != coin.getTitle()){
+        if (marketListViewHolder.item_title_txv.getTag() == null
+                || marketListViewHolder.item_title_txv.getTag() != coin.getTitle()){
             marketListViewHolder.item_title_txv.setText(coin.getTitle());
             marketListViewHolder.item_title_txv.setTag(coin.getTitle());
         }
@@ -72,17 +73,21 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
 
         if (coin.getDailyChangeRate() != null) {
             if (coin.getDailyChangeRate() > 0.00) {
-                setBackgroundColorAndChangeSymbol(marketListViewHolder, priceGreen, priceGreenColor, goesUp, true);
+                setBackgroundColorAndChangeSymbol(marketListViewHolder,
+                        priceGreen, priceGreenColor, goesUp, true);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             } else if (coin.getDailyChangeRate() < 0.00) {
-                setBackgroundColorAndChangeSymbol(marketListViewHolder, priceRed, priceRedColor, goesDown, true);
+                setBackgroundColorAndChangeSymbol(marketListViewHolder,
+                        priceRed, priceRedColor, goesDown, true);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             } else {
-                setBackgroundColorAndChangeSymbol(marketListViewHolder, priceGrey, priceGreyColor, goesFlat, true);
+                setBackgroundColorAndChangeSymbol(marketListViewHolder, priceGrey,
+                        priceGreyColor, goesFlat, true);
                 marketListViewHolder.item_changeRate_txv.setText(changeRate);
             }
         } else {
-            setBackgroundColorAndChangeSymbol(marketListViewHolder, priceGrey, priceGreyColor, goesFlat, false);
+            setBackgroundColorAndChangeSymbol(marketListViewHolder, priceGrey,
+                    priceGreyColor, goesFlat, false);
             marketListViewHolder.item_changeRate_txv.setText(NOT_AVAILABLE);
         }
     }
@@ -92,9 +97,12 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         onBindItemViewHolder(holder, position);
     }
 
-    private void setBackgroundColorAndChangeSymbol(MarketListViewHolder marketListViewHolder, Drawable newBG, int newColor, Drawable newSymbol, boolean showSymbol) {
+    private void setBackgroundColorAndChangeSymbol(MarketListViewHolder marketListViewHolder,
+                                                   Drawable newBG, int newColor,
+                                                   Drawable newSymbol, boolean showSymbol) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            if (marketListViewHolder.item_change_bg.getTag() == null || marketListViewHolder.item_change_bg.getTag() != newBG) {
+            if (marketListViewHolder.item_change_bg.getTag() == null
+                    || marketListViewHolder.item_change_bg.getTag() != newBG) {
                 marketListViewHolder.item_change_bg.setBackground(newBG);
                 marketListViewHolder.item_change_bg.setTag(newBG);
             }
@@ -103,7 +111,8 @@ public class MarketListAdapter extends InfiniteAdapter<Coin>{
         }
         if (showSymbol) {
             marketListViewHolder.item_changeSymbol_igv.setVisibility(View.VISIBLE);
-            if (marketListViewHolder.item_changeSymbol_igv.getTag() == null || marketListViewHolder.item_changeSymbol_igv.getTag() != newSymbol) {
+            if (marketListViewHolder.item_changeSymbol_igv.getTag() == null
+                    || marketListViewHolder.item_changeSymbol_igv.getTag() != newSymbol) {
                 marketListViewHolder.item_changeSymbol_igv.setImageDrawable(newSymbol);
                 marketListViewHolder.item_changeSymbol_igv.setTag(newSymbol);
             }

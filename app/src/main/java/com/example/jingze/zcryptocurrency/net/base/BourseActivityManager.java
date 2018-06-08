@@ -15,7 +15,7 @@ import com.example.jingze.zcryptocurrency.model.Directory;
  */
 
 public abstract class BourseActivityManager {
-    protected WebManager webManager;
+
     protected Looper dataThreadLooper;
     protected Handler mainThreadHandler;
     protected Handler dataThreadHandler;
@@ -56,6 +56,10 @@ public abstract class BourseActivityManager {
 
     protected void inspectFailureList() {
         Log.d("Raych", this + ": BourseActivity.inspectFailureList(): is called.");
+        if (!isAutoFailureCheckEnabled) {
+            return;
+        }
+
         int length = failureList.length;
         for (int i = 0; i < length; i++) {
             if (failureList[i]) {

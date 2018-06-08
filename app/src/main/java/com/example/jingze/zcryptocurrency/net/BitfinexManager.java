@@ -7,6 +7,7 @@ import android.util.Log;
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
+import com.example.jingze.zcryptocurrency.net.base.WebManager;
 import com.example.jingze.zcryptocurrency.utils.ModelUtils;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -18,7 +19,8 @@ import java.util.ArrayList;
  */
 
 public class BitfinexManager extends BourseActivityManager {
-
+    private static final String API_URL = "wss://api.bitfinex.com/ws/2";
+    private WebManager webManager;
     public static class Event {
         public String event;
         public String channel;
@@ -133,10 +135,9 @@ public class BitfinexManager extends BourseActivityManager {
                 //position may be changed.
                 coinMenu.initiate();
 
-                String url = coinMenu.getUrl();
                 webManager= new WebSocketManager
                         .Builder(mainThreadHandler, dataThreadHandler)
-                        .url(url)
+                        .url(API_URL)
                         .isNeedReconnect(true)
                         .build();
                 webManager.startConnect();
@@ -199,7 +200,7 @@ public class BitfinexManager extends BourseActivityManager {
     @Override
     protected boolean callbackLogic(Message message) {
         if (message.what == WebSocketManager.MESSAGE_TYPE_TEXT) {
-            Event newMsg = parseData((String) message.obj);
+            Event newMsg = parseMessage(message);
             switch (newMsg.event) {
                 case EVENT_TYPE.HEARTBEATTING: {
 //                    Log.v("Raych", "BitfinexManager.callbackLogic(): Get a Bitfinex.Event(HeartBeating): ");
@@ -250,7 +251,11 @@ public class BitfinexManager extends BourseActivityManager {
     }    
 
     //Private Methods
-    private Event parseData(String data) {
+    private Event parseMessage(Message message) {
+        if (message.obj == null) {
+            return null;
+        }
+        String data = (String) message.obj;
         Event newEvent = null;
         if ((data.charAt(0) == '{') && (data.charAt(data.length() - 1) == '}')) {
             try {

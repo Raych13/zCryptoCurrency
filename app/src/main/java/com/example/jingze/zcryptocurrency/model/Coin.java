@@ -20,6 +20,18 @@ public class Coin implements Parcelable{
     @Expose
     private Double dailyChangeRate;
     private Double dailyChange;
+    private OnPriceChangedListener onPriceChangedListener;
+    private OnDailyChangeRateChangedListener onDailyChangeRateChangedListener;
+
+    interface OnPriceChangedListener {
+        //If return true, it indicates that this Listener will be deleted after recall.
+        boolean onPriceChanged(Double prevPrice, Double newPrice);
+    }
+
+    interface OnDailyChangeRateChangedListener {
+        //If return true, it indicates that this Listener will be deleted after recall.
+        boolean onChangeRateChanged(Double prevDailyChangeRate, Double newDailyChangeRate);
+    }
 
    //Constructor with Builder
     public Coin(){
@@ -53,6 +65,11 @@ public class Coin implements Parcelable{
     }
 
     public synchronized boolean setPrice(Double priceUSD) {
+        if (onPriceChangedListener != null) {
+            if (onPriceChangedListener.onPriceChanged(this.price, price)) {
+                onPriceChangedListener = null;
+            }
+        }
         this.price = priceUSD;
         return false;
     }
@@ -62,11 +79,26 @@ public class Coin implements Parcelable{
     }
 
     public synchronized boolean setDailyChangeRate(Double dailyChangeRate) {
+        if (onDailyChangeRateChangedListener != null) {
+            if (onDailyChangeRateChangedListener.onChangeRateChanged(this.dailyChangeRate, dailyChangeRate)) {
+                onDailyChangeRateChangedListener = null;
+            }
+        }
         this.dailyChangeRate = dailyChangeRate;
         return false;
     }
 
     public synchronized boolean setPriceAndChangeRate(Double price, Double dailyChangeRate) {
+        if (onPriceChangedListener != null) {
+            if (onPriceChangedListener.onPriceChanged(this.price, price)) {
+                onPriceChangedListener = null;
+            }
+        }
+        if (onDailyChangeRateChangedListener != null) {
+            if (onDailyChangeRateChangedListener.onChangeRateChanged(this.dailyChangeRate, dailyChangeRate)) {
+                onDailyChangeRateChangedListener = null;
+            }
+        }
         this.price = price;
         this.dailyChangeRate = dailyChangeRate;
         return true;
@@ -79,6 +111,14 @@ public class Coin implements Parcelable{
     public synchronized boolean setPositionInList(Integer positionInList) {
         this.positionInList = positionInList;
         return true;
+    }
+
+    public void setOnPriceChangedListener(OnPriceChangedListener onPriceChangedListener) {
+        this.onPriceChangedListener = onPriceChangedListener;
+    }
+
+    public void setOnDailyChangeRateChangedListener(OnDailyChangeRateChangedListener onDailyChangeRateChangedListener) {
+        this.onDailyChangeRateChangedListener = onDailyChangeRateChangedListener;
     }
 
     //Parcelable

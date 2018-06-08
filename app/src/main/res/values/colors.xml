@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#DDD000</color>
-    <color name="colorPrimaryDark">#FFFFFF</color>
+    <color name="colorPrimary">#F6D000</color>
+    <color name="colorPrimaryDark">#F6D000</color>
     <color name="colorAccent">#FFFFFFDD</color>
-    <color name="statusBarColor">#000000</color>
 
     <color name="golden">#DDCC00</color>
     <color name="lemonYellow">#FFEE33</color>
     <color name="pureWhite">#FFFFFFFF</color>
-    <color name="yellowWhite">#FFFFFFDD</color>
+    <color name="yellowWhite">
+
+    </color>
 
     <color name="place_holder_bg">#00000000</color>
 

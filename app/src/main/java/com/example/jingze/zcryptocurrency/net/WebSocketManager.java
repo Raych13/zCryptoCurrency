@@ -298,7 +298,6 @@ public class WebSocketManager extends WebManager {
         }
     }
 
-
     public interface WebSocketExtraListener{
         void onOpen(Response response);
 

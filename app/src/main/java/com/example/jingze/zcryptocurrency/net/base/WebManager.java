@@ -19,7 +19,6 @@ public abstract class WebManager {
 
     public abstract boolean send(Object msg);
 
-
     //The codes of status.
     public static class Status {
         //DISCONNECTED indicates that network is unavailable or being disconnected manually.

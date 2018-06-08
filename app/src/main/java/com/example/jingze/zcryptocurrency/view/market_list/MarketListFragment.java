@@ -20,6 +20,7 @@ import com.example.jingze.zcryptocurrency.R;
 import com.example.jingze.zcryptocurrency.model.Coin;
 import com.example.jingze.zcryptocurrency.model.CoinMenu;
 import com.example.jingze.zcryptocurrency.net.BitfinexManager;
+import com.example.jingze.zcryptocurrency.net.PoloniexManager;
 import com.example.jingze.zcryptocurrency.net.base.BourseActivityManager;
 import com.example.jingze.zcryptocurrency.net.HuobiManager;
 import com.example.jingze.zcryptocurrency.net.handler.UIHandler;
@@ -216,7 +217,6 @@ public class MarketListFragment extends Fragment{
         this.dataThreadHandler = dataThreadHandler;
     }
 
-
     private void setupBourseActivityManager(final CoinMenu coinMenu) {
         final int DELAY = 1000;
         int setupDelay = (currentPagePosition == pagePosition ? 0 : DELAY);
@@ -231,6 +231,16 @@ public class MarketListFragment extends Fragment{
                 }, setupDelay);
                 break;
             }
+            case "Poloniex": {
+                dataThreadHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        bourseActivityManager = new PoloniexManager(dataThreadHandler.getLooper(), coinMenu);
+                        bourseActivityManager.startConnection();
+                    }
+                }, setupDelay);
+                break;
+            }
             case "Huobi": {
                 dataThreadHandler.postDelayed(new Runnable() {
                     @Override
@@ -239,7 +249,6 @@ public class MarketListFragment extends Fragment{
                         bourseActivityManager.startConnection();
                     }
                 }, setupDelay);
-
                 break;
             }
             default: {
