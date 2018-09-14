@@ -1,4 +1,4 @@
-package com.example.jingze.zcryptocurrency.model;
+package com.example.jingze.zcryptocurrency.model.websites;
 
 import java.util.Set;
 
