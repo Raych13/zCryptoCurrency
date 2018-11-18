@@ -42,6 +42,20 @@ dependencies {
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
+    // ViewModel and LiveData
+    implementation "android.arch.lifecycle:extensions:$rootProject.lifecycleVersion"
+    // alternatively - just ViewModel
+    implementation "android.arch.lifecycle:viewmodel:$rootProject.lifecycleVersion" // use -ktx for Kotlin
+    // alternatively - just LiveData
+    implementation "android.arch.lifecycle:livedata:$rootProject.lifecycleVersion"
+    // alternatively - Lifecycles only (no ViewModel or LiveData).
+    //     Support library depends on this lightweight import
+    implementation "android.arch.lifecycle:runtime:$rootProject.lifecycleVersion"
+
+    kapt "android.arch.lifecycle:compiler:$rootProject.lifecycleVersion" // use kapt for Kotlin
+    // alternately - if using Java8, use the following instead of compiler
+    implementation "android.arch.lifecycle:common-java8:$rootProject.lifecycleVersion"
+
     //ButterKnife
     implementation "com.jakewharton:butterknife:$rootProject.butterknifeVersion"
     kapt "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
