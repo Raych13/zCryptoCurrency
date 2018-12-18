@@ -1,7 +1,6 @@
 package com.example.jingze.zcryptocurrency.di.application
 
 import dagger.Component
-import dagger.android.support.AndroidSupportInjectionModule
 import javax.inject.Singleton
 import android.app.Application
 import com.example.jingze.zcryptocurrency.MyApplication
@@ -9,9 +8,11 @@ import dagger.BindsInstance
 import dagger.android.AndroidInjector
 
 @Singleton
-@Component(modules = arrayOf(AndroidSupportInjectionModule::class,
+@Component(modules = arrayOf(
+        AppModule::class,
         ActivityBindingModule::class,
-        ApplicationModule::class))
+        ViewModelBindingModule::class,
+        AndroidSupportInjectionAndProviderModule::class))
 interface AppComponent : AndroidInjector<MyApplication> {
 
     @Component.Builder
