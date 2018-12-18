@@ -10,7 +10,7 @@ class ViewModelFactory private constructor() : ViewModelProvider.NewInstanceFact
     lateinit var providerFactories: Map<Class<out BaseViewModel>, Provider<AndroidProvider.Factory<out BaseViewModel>>>
 
     fun <T : BaseViewModel> create(modelClass: Class<T>): T {
-//        providerFactories.get(modelClass)?.let { it.get().create().provide() } ?:
+//        providers.get(modelClass)?.let { it.get().create().provide() } ?:
 
         return super.create(modelClass)
     }
