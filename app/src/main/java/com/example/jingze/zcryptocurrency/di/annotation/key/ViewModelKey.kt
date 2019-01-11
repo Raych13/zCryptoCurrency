@@ -1,4 +1,4 @@
-package com.example.jingze.zcryptocurrency.di
+package com.example.jingze.zcryptocurrency.di.annotation.key
 
 import com.example.jingze.zcryptocurrency.customized.BaseViewModel
 import dagger.MapKey

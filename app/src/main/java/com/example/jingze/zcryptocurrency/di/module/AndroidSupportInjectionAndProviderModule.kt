@@ -1,4 +1,4 @@
-package com.example.jingze.zcryptocurrency.di.application
+package com.example.jingze.zcryptocurrency.di.module
 
 import com.example.jingze.zcryptocurrency.customized.BaseViewModel
 import dagger.Module
