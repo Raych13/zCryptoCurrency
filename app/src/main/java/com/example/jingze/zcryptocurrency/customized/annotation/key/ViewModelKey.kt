@@ -1,6 +1,6 @@
-package com.example.jingze.zcryptocurrency.di.annotation.key
+package com.example.jingze.zcryptocurrency.customized.annotation.key
 
-import com.example.jingze.zcryptocurrency.customized.BaseViewModel
+import com.example.jingze.zcryptocurrency.customized.base.BaseViewModel
 import dagger.MapKey
 import kotlin.reflect.KClass
 
@@ -11,7 +11,7 @@ annotation class ViewModelKey(val value: KClass<out BaseViewModel>)
 // Java Stub
 //import static java.lang.annotation.ElementType.METHOD;
 //
-//import com.example.jingze.zcryptocurrency.customized.BaseViewModel;
+//import com.example.jingze.zcryptocurrency.customized.base.BaseViewModel;
 //import dagger.MapKey;
 //import java.lang.annotation.Target;
 //
