@@ -1,8 +1,8 @@
 package com.example.jingze.zcryptocurrency.customized.base
 
 import android.app.Application
-import android.arch.lifecycle.ViewModelProvider
-import android.support.annotation.VisibleForTesting
+import androidx.lifecycle.ViewModelProvider
+import androidx.annotation.VisibleForTesting
 import com.example.jingze.zcryptocurrency.MyApplication
 import javax.inject.Inject
 import javax.inject.Provider

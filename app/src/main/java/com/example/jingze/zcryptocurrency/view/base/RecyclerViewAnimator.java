@@ -1,7 +1,7 @@
 package com.example.jingze.zcryptocurrency.view.base;
 
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Jingze HUANG on Apr.01, 2018.
